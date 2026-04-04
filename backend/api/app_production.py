@@ -1055,19 +1055,6 @@ def create_app(config_name='production'):
                     final_origin_confidence = "medium"
                 elif final_origin_confidence in {None, "", "unknown"}:
                     final_origin_confidence = "medium"
-                # Learn this brand→origin for future lookups
-                if scraped_source in (top_confidence_sources | explicit_sources):
-                    _brand_raw = product.get("brand", "")
-                    if _brand_raw and str(_brand_raw).strip().lower() not in ("", "unknown"):
-                        try:
-                            import backend.scrapers.amazon.scrape_amazon_titles as _titles_mod
-                            _bkey = str(_brand_raw).strip().lower()
-                            if _bkey not in _titles_mod.brand_locations:
-                                _titles_mod.brand_locations[_bkey] = {"origin": {"country": origin_country}}
-                                deps["save_brand_locations"]()
-                                print(f"📦 Learned new brand origin: {_brand_raw} → {origin_country}")
-                        except Exception as _brand_save_err:
-                            print(f"⚠️ Could not save brand origin: {_brand_save_err}")
             elif not _is_unknown_value(scraped_origin) and scraped_source in weak_sources:
                 print(f"⚠️ Ignoring weak scraped origin '{scraped_origin}' from source '{scraped_source}' and continuing fallbacks")
 
@@ -3710,7 +3697,7 @@ def create_app(config_name='production'):
 
     @app.route('/api/analyse-image', methods=['POST', 'OPTIONS'])
     def analyse_image():
-        """Use Claude vision + category-aware reasoning to identify materials from a product image."""
+        """Use Impact Tracker Vision + category-aware reasoning to identify materials from a product image."""
         if request.method == 'OPTIONS':
             return '', 204
 
