@@ -202,7 +202,7 @@ def create_tables(app):
     """Create all database tables"""
     with app.app_context():
         db.create_all()
-        print("✅ Database tables created successfully")
+        print("Database tables created.")
 
 def get_products_by_material(material):
     """Get all products by material type"""

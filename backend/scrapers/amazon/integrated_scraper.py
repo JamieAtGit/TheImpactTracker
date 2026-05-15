@@ -90,7 +90,7 @@ def scrape_amazon_product_page(amazon_url: str, fallback: bool = False) -> Dict[
         requests_result = scrape_with_requests(amazon_url)
         
         if requests_result and requests_result.get("title") != "Unknown Product":
-            logger.info("✅ Requests extraction successful!")
+            logger.info("Requests extraction successful.")
             return requests_result
         else:
             logger.warning("⚠️ Requests extraction failed, trying master stealth")
@@ -100,13 +100,13 @@ def scrape_amazon_product_page(amazon_url: str, fallback: bool = False) -> Dict[
     
     # Try MASTER stealth scraper as backup (ultimate anti-bot detection)
     try:
-        logger.info("🎓 Attempting MASTER stealth extraction...")
+        logger.info("Attempting stealth extraction...")
         from .master_stealth import master_scrape_amazon
         
         master_result = master_scrape_amazon(amazon_url)
         
         if master_result and master_result.get("title") != "Unknown Product":
-            logger.info("✅ MASTER stealth extraction successful!")
+            logger.info("Stealth extraction successful.")
             return master_result
         else:
             logger.warning("⚠️ Master stealth failed, trying standard stealth")
@@ -122,7 +122,7 @@ def scrape_amazon_product_page(amazon_url: str, fallback: bool = False) -> Dict[
         stealth_result = scrape_with_stealth(amazon_url)
         
         if stealth_result and stealth_result.get("title") != "Unknown Product":
-            logger.info("✅ Stealth extraction successful!")
+            logger.info("Stealth extraction successful.")
             return stealth_result
         else:
             logger.warning("⚠️ Stealth extraction failed, trying mobile stealth")
@@ -138,7 +138,7 @@ def scrape_amazon_product_page(amazon_url: str, fallback: bool = False) -> Dict[
         mobile_result = scrape_mobile_stealth(amazon_url)
         
         if mobile_result and mobile_result.get("title") != "Unknown Product":
-            logger.info("✅ Mobile stealth extraction successful!")
+            logger.info("Mobile stealth extraction successful.")
             return mobile_result
         else:
             logger.warning("⚠️ Mobile stealth failed, trying enhanced scraper")
@@ -148,14 +148,14 @@ def scrape_amazon_product_page(amazon_url: str, fallback: bool = False) -> Dict[
     
     # Try enhanced scraper as backup
     try:
-        logger.info("🚀 Attempting enhanced extraction...")
+        logger.info("Attempting enhanced extraction...")
         from .enhanced_integration import enhanced_scrape_amazon_product_page
         
         enhanced_result = enhanced_scrape_amazon_product_page(amazon_url, fallback=False)
         
         # Check if enhanced scraper was successful
         if enhanced_result and enhanced_result.get("title") != "Extraction Failed":
-            logger.info("✅ Enhanced extraction successful!")
+            logger.info("Enhanced extraction successful.")
             
             # Convert enhanced result to your existing format
             converted_result = convert_enhanced_to_legacy_format(enhanced_result)
@@ -173,7 +173,7 @@ def scrape_amazon_product_page(amazon_url: str, fallback: bool = False) -> Dict[
         
         # Use your existing scraper
         original_result = original_scraper(amazon_url, fallback=False)
-        logger.info("✅ Original scraper completed")
+        logger.info("Original scraper completed.")
         return original_result
         
     except Exception as e:
@@ -222,7 +222,7 @@ def convert_enhanced_to_legacy_format(enhanced_result: Dict[str, Any]) -> Dict[s
             "brand": enhanced_result.get("brand")
         })
         
-        logger.info(f"✅ Converted enhanced result - Quality: {legacy_result.get('enhanced_quality_score', 0)}%")
+        logger.info(f"Converted enhanced result - quality: {legacy_result.get('enhanced_quality_score', 0)}%")
         return legacy_result
         
     except Exception as e:

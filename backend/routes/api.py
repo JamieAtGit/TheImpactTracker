@@ -37,7 +37,7 @@ CORS(app)
 # Initialize manufacturing complexity system for realistic CO2 calculations
 complexity_calculator = ManufacturingComplexityCalculator()
 materials_db = EnhancedMaterialsDatabase()
-print("✅ API now using realistic CO2 calculations with manufacturing complexity")
+print("API loaded: CO2 calculations with manufacturing complexity")
 
 # Helper function to determine transport mode based on distance
 def determine_transport_mode(distance_km):
@@ -174,7 +174,7 @@ def estimate():
     "Truck": 0.15
     }
     
-    # ✅ Get the default mode based on distance
+    # Get the default mode based on distance
     default_mode, default_emission_factor = determine_transport_mode(distance)
 
     
@@ -188,7 +188,7 @@ def estimate():
         emission_factor = default_emission_factor
         print(f"📦 Auto-detected transport mode used: {transport_mode}")
 
-    # ✅ Calculate realistic CO2 using manufacturing complexity (same as fixed dataset)
+    # Calculate CO2 using manufacturing complexity
     # Get material CO2 intensity from enhanced database
     material_co2_per_kg = materials_db.get_material_impact_score(product.get("material", "").lower())
     if not material_co2_per_kg:
@@ -241,7 +241,7 @@ def estimate():
     confidence = product.get("confidence", "Estimated")
 
 
-    print("✅ Final values:", {
+    print("Final values:", {
     "transport_mode": transport_mode,
     "default": default_mode,
     "override": override_mode,

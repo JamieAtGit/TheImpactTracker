@@ -16,7 +16,7 @@ Method
 - Saves calibrated_model.pkl — a sklearn CalibratedClassifierCV wrapper
   with the same predict / predict_proba interface as XGBClassifier.
 - Saves calibration_results.json — reliability diagram data (fraction of
-  positives vs mean predicted probability, per class) for dissertation figures.
+  positives vs mean predicted probability, per class).
 
 Usage
 -----
@@ -116,7 +116,7 @@ def _build_features(df: pd.DataFrame, encoders: dict):
 
 
 def _reliability_data(y_true, y_proba, label_classes) -> dict:
-    """Compute reliability diagram data per class (for dissertation figures)."""
+    """Compute reliability diagram data per class."""
     results = {}
     for i, grade in enumerate(label_classes):
         if i >= y_proba.shape[1]:

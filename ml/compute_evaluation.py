@@ -1,7 +1,7 @@
 """
 compute_evaluation.py
 =====================
-Produces evaluation_results.json — all academic evaluation metrics for the
+Produces evaluation_results.json — evaluation metrics for the
 ImpactTracker XGBoost model.  Run once locally; commit the JSON; the backend
 serves it statically so Railway never needs to recompute it.
 

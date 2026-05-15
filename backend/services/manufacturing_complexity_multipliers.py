@@ -334,7 +334,7 @@ class ManufacturingComplexityCalculator:
         print("• Electronics show biggest improvements (closer to real-world values)")
         print("• Simple products (books, tools) show minimal changes")
         print("• Manufacturing complexity varies dramatically by category")
-        print("• Based on academic LCA studies and industry reports")
+        print("• Based on LCA studies and industry reports")
 
         return test_products
 

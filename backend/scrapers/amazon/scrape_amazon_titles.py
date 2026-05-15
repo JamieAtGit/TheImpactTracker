@@ -1910,7 +1910,7 @@ def resolve_origin(scraped, fallback, field_name="country", context=None):
     """
      MODULAR FIELD RESOLUTION - Intelligent conflict resolution with confidence scoring
 
-    This function implements enterprise-grade logic for resolving conflicts between
+    This function resolves conflicts between
     scraped data and fallback mappings. Can be reused for any field (origin, material, packaging).
 
     Args:
@@ -3883,7 +3883,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
         return product
 
 
-        #  Add comprehensive distance fields using global calculation system
+        # Add distance fields
         destination_country = "UK"  # TODO: Make configurable based on user location
         distance_info = calculate_global_distance(origin_country, destination_country)
 
@@ -3978,7 +3978,7 @@ if __name__ == "__main__":
                 for p in new_products:
                     asin = p.get("asin")
                     maybe_add_to_priority(p, priority_db)
-                    Log.success(f"⭐ Added high-confidence product: {asin}")
+                    Log.success(f" Added high-confidence product: {asin}")
 
                 #  Save after each batch of new products
                 with open(priority_path, "w", encoding="utf-8") as f:

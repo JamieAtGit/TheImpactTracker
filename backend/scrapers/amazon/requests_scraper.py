@@ -66,10 +66,10 @@ class RequestsScraper:
                     if normalized != 'Unknown':
                         index[asin] = normalized
             except Exception as error:
-                print(f"⚠️ Could not load ASIN origin index from {path}: {error}")
+                print(f"️ Could not load ASIN origin index from {path}: {error}")
 
         if index:
-            print(f"📚 Loaded {len(index)} ASIN origin hints from cleaned products")
+            print(f" Loaded {len(index)} ASIN origin hints from cleaned products")
         return index
 
     def lookup_asin_origin(self, asin: str) -> str:
@@ -119,9 +119,9 @@ class RequestsScraper:
                 if normalized:
                     index[normalized] = country
 
-            print(f"📚 Loaded {len(index)} brand origins from brand_locations.json")
+            print(f" Loaded {len(index)} brand origins from brand_locations.json")
         except Exception as error:
-            print(f"⚠️ Could not load brand origin index: {error}")
+            print(f"️ Could not load brand origin index: {error}")
 
         return index
 
@@ -167,7 +167,7 @@ class RequestsScraper:
     
     def scrape_product(self, url: str) -> Optional[Dict]:
         """Scrape product using requests"""
-        print(f"📡 Requests scraping: {url}")
+        print(f" Requests scraping: {url}")
         
         # Extract ASIN for clean URL
         asin_match = re.search(r'/dp/([A-Z0-9]{10})', url)
@@ -190,14 +190,14 @@ class RequestsScraper:
             else:
                 response = self.session.get(clean_url, headers=headers, timeout=15)
 
-            print(f"📡 Response: {response.status_code}")
+            print(f" Response: {response.status_code}")
             
             if response.status_code == 200:
                 soup = BeautifulSoup(response.content, 'html.parser')
                 
                 # Check for bot detection
                 if self.is_blocked(soup):
-                    print("🚫 Bot detection — Amazon is blocking this IP. Set SCRAPERAPI_KEY env var to fix.")
+                    print(" Bot detection — Amazon is blocking this IP. Set SCRAPERAPI_KEY env var to fix.")
                     return {"title": "blocked", "origin": "Unknown", "weight_kg": 1.0,
                             "material_type": "Unknown", "recyclability": "Medium",
                             "eco_score_ml": "C", "brand": "Unknown", "asin": asin}
@@ -206,11 +206,11 @@ class RequestsScraper:
                 return self.extract_from_soup(soup, asin, clean_url)
             
             else:
-                print(f"⚠️ HTTP {response.status_code}")
+                print(f"️ HTTP {response.status_code}")
                 return self.create_intelligent_fallback(url, asin)
                 
         except Exception as e:
-            print(f"📡 Requests error: {e}")
+            print(f" Requests error: {e}")
             return self.create_intelligent_fallback(url, asin)
     
     def is_blocked(self, soup) -> bool:
@@ -284,18 +284,18 @@ class RequestsScraper:
         origin_from_spec = self.extract_origin_from_spec_table(soup)
         # 1) Full-text tech details scan (handles \u200e-separated Amazon tables)
         origin_from_tech = self.extract_origin_from_tech_details(all_text)
-        print(f"🔍 Spec table origin: '{origin_from_spec}', tech text origin: '{origin_from_tech}'")
+        print(f" Spec table origin: '{origin_from_spec}', tech text origin: '{origin_from_tech}'")
 
         if origin_from_spec != "Unknown":
             origin = origin_from_spec
             origin_source = "technical_details"
             origin_confidence = "high"
-            print(f"📍 ✅ Using structured spec table origin: {origin}")
+            print(f"  Using structured spec table origin: {origin}")
         elif origin_from_tech != "Unknown":
             origin = origin_from_tech
             origin_source = "technical_details"
             origin_confidence = "high"
-            print(f"📍 ✅ Using tech details origin: {origin}")
+            print(f"  Using tech details origin: {origin}")
         else:
             # 2) Other explicit page sections
             origin_from_explicit = self.extract_origin_from_explicit_sections(soup)
@@ -303,7 +303,7 @@ class RequestsScraper:
                 origin = origin_from_explicit
                 origin_source = "explicit_sections"
                 origin_confidence = "high"
-                print(f"📍 ✅ Using explicit sections fallback: {origin}")
+                print(f"  Using explicit sections fallback: {origin}")
             else:
                 # 3) Description / bullets keyword extraction
                 origin_from_keywords = self.extract_origin_from_description_bullets(soup)
@@ -311,7 +311,7 @@ class RequestsScraper:
                     origin = origin_from_keywords
                     origin_source = "description_keywords"
                     origin_confidence = "medium"
-                    print(f"📍 ✅ Using description keyword fallback: {origin}")
+                    print(f"  Using description keyword fallback: {origin}")
                 else:
                     # 4) Deep text mining
                     origin_from_text_mining = self.extract_origin_from_text_mining(all_text)
@@ -319,7 +319,7 @@ class RequestsScraper:
                         origin = origin_from_text_mining
                         origin_source = "text_mining"
                         origin_confidence = "low"
-                        print(f"📍 ✅ Using text mining fallback: {origin}")
+                        print(f"  Using text mining fallback: {origin}")
                     else:
                         # 4.5) Title-based "Made in X" / "X Made" — e.g. "UK Made", "Made in UK"
                         _title_origin = self._extract_origin_from_title(title)
@@ -327,7 +327,7 @@ class RequestsScraper:
                             origin = _title_origin
                             origin_source = "title_keywords"
                             origin_confidence = "medium"
-                            print(f"📍 ✅ Using title-based origin: {origin}")
+                            print(f"  Using title-based origin: {origin}")
                         else:
                             # 5) Brand database fallback
                             brand_origin, source = self.lookup_brand_origin(brand)
@@ -335,7 +335,7 @@ class RequestsScraper:
                                 origin = brand_origin
                                 origin_source = source
                                 origin_confidence = "medium"
-                                print(f"📍 ✅ Using brand_locations fallback: {origin} (source: {source}, brand: {brand})")
+                                print(f"  Using brand_locations fallback: {origin} (source: {source}, brand: {brand})")
                             else:
                                 # 6) ASIN history fallback
                                 asin_origin = self.lookup_asin_origin(asin)
@@ -343,14 +343,14 @@ class RequestsScraper:
                                     origin = asin_origin
                                     origin_source = "asin_history"
                                     origin_confidence = "low"
-                                    print(f"📍 ✅ Using ASIN history fallback: {origin} (asin: {asin})")
+                                    print(f"  Using ASIN history fallback: {origin} (asin: {asin})")
                                 else:
                                     # 7) Weak heuristic fallback
                                     brand_origin = self.estimate_origin(brand)
                                     origin = brand_origin
                                     origin_source = "heuristic_brand_default"
                                     origin_confidence = "low"
-                                    print(f"📍 ⚠️ Using heuristic brand fallback: {origin} (from brand: {brand})")
+                                    print(f" ️ Using heuristic brand fallback: {origin} (from brand: {brand})")
         
         # Extract weight
         weight = self.extract_weight(all_text)
@@ -359,11 +359,11 @@ class RequestsScraper:
             title_weight = self.extract_weight(title)
             if title_weight != 1.0:
                 weight = title_weight
-                print(f"⚖️ Found weight in title: {weight} kg")
+                print(f"️ Found weight in title: {weight} kg")
             else:
-                print(f"⚖️ Using default weight: {weight} kg")
+                print(f"️ Using default weight: {weight} kg")
         else:
-            print(f"⚖️ Found weight in tech details: {weight} kg")
+            print(f"️ Found weight in tech details: {weight} kg")
         
         # Smart material detection - check for protein powder first
         if any(keyword in title.lower() for keyword in ['protein', 'powder', 'mass gainer', 'supplement', 'whey', 'casein']):
@@ -371,19 +371,19 @@ class RequestsScraper:
 
             # For protein powder, if weight is suspiciously low, try better extraction
             if weight < 0.5:  # Protein powder should be at least 500g
-                print(f"⚠️ Protein powder weight seems low ({weight}kg), trying enhanced extraction...")
+                print(f"️ Protein powder weight seems low ({weight}kg), trying enhanced extraction...")
 
                 # Re-run extract_weight on just the title for better precision
                 title_weight = self.extract_weight(title)
                 if title_weight != 1.0 and 0.5 <= title_weight <= 10:
                     weight = title_weight
-                    print(f"⚖️ Found better protein weight in title: {weight}kg")
+                    print(f"️ Found better protein weight in title: {weight}kg")
         else:
             # First try spec table — explicit "Material: X" row is the most reliable source
             spec_material = self.extract_material_from_spec_table(soup)
             if spec_material:
                 material = spec_material
-                print(f"🧵 Using spec table material: {material}")
+                print(f" Using spec table material: {material}")
             else:
                 material = self.detect_material(title, all_text)
 
@@ -601,12 +601,12 @@ class RequestsScraper:
             "category": self.detect_category_from_title(title),
         }
 
-        print(f"📡 Requests extracted: {title[:50]}...")
+        print(f" Requests extracted: {title[:50]}...")
         return result
     
     def create_intelligent_fallback(self, url: str, asin: str) -> Dict:
         """Create intelligent fallback based on URL analysis"""
-        print("🧠 Creating intelligent fallback...")
+        print(" Creating intelligent fallback...")
         
         # Analyze URL for clues
         url_lower = url.lower()
@@ -1004,7 +1004,7 @@ class RequestsScraper:
                 context_end = min(len(text_lower), country_pos + 80)
                 context = text_lower[context_start:context_end]
                 if any(sig in context for sig in _ORIGIN_SIGNALS):
-                    print(f"🔍 DEBUG: Found '{country}' in text: '{context}'")
+                    print(f" DEBUG: Found '{country}' in text: '{context}'")
         
         # Look for country of origin patterns with improved regex (ordered by specificity)
         # Note: Amazon HTML uses Unicode left-to-right marks (\u200e) as separators in
@@ -1029,7 +1029,7 @@ class RequestsScraper:
         
         for pattern, pattern_name in patterns:
             matches = re.findall(pattern, text_lower, re.IGNORECASE)
-            print(f"🔍 Pattern '{pattern_name}': {matches}")
+            print(f" Pattern '{pattern_name}': {matches}")
             
             if matches:
                 # Take the first match and clean it
@@ -1047,21 +1047,21 @@ class RequestsScraper:
                 ]
                 candidate_lower = candidate.lower()
                 if any(token in candidate_lower for token in invalid_tokens):
-                    print(f"🔍 ⚠️ Rejecting non-country candidate: '{candidate}'")
+                    print(f" ️ Rejecting non-country candidate: '{candidate}'")
                     continue
                 
-                print(f"🔍 Candidate after cleaning: '{candidate}'")
+                print(f" Candidate after cleaning: '{candidate}'")
                 
                 if candidate and len(candidate) >= 2:  # At least 2 characters
                     normalized = normalize_country_name(candidate)
                     if normalized != "Unknown":
                         result = normalized
-                        print(f"🔍 ✅ Normalized '{candidate}' -> '{result}' using pattern '{pattern_name}'")
+                        print(f"  Normalized '{candidate}' -> '{result}' using pattern '{pattern_name}'")
                         return result
                     else:
-                        print(f"🔍 ⚠️ Rejected non-canonical origin candidate: '{candidate}'")
+                        print(f" ️ Rejected non-canonical origin candidate: '{candidate}'")
         
-        print(f"🔍 ❌ No origin found in technical details")
+        print(f"  No origin found in technical details")
         return "Unknown"
 
     def extract_material_from_spec_table(self, soup: BeautifulSoup) -> Optional[str]:
@@ -1116,11 +1116,11 @@ class RequestsScraper:
             # Exact primary match (key IS one of the primary fields, no extra words)
             if key in primary_exact and primary_hit is None:
                 primary_hit = value
-                print(f"🧵 Spec table primary material field '{key}': '{value}'")
+                print(f" Spec table primary material field '{key}': '{value}'")
             # Substring secondary match (key CONTAINS a primary word but has a modifier)
             elif any(pk in key for pk in primary_exact) and secondary_hit is None:
                 secondary_hit = value
-                print(f"🧵 Spec table secondary material field '{key}': '{value}'")
+                print(f" Spec table secondary material field '{key}': '{value}'")
             # Explicit subcomponent field
             elif any(sk in key for sk in secondary_keys) and secondary_hit is None:
                 secondary_hit = value
@@ -1140,7 +1140,7 @@ class RequestsScraper:
                         value = match.group(1).strip().strip('‎').strip()
                         if value and len(value) < 150 and primary_hit is None:
                             primary_hit = value
-                            print(f"🧵 Detail bullets material '{mk}': '{value}'")
+                            print(f" Detail bullets material '{mk}': '{value}'")
 
         result = primary_hit or secondary_hit
         return result
@@ -1275,7 +1275,7 @@ class RequestsScraper:
 
         if not found:
             return None
-        print(f"🧵 Title-detected materials: {[m['name'] for m in found]}")
+        print(f" Title-detected materials: {[m['name'] for m in found]}")
         return {'materials': found}
 
     def extract_all_materials_from_spec_table(self, soup: BeautifulSoup) -> Optional[Dict]:
@@ -1599,7 +1599,7 @@ class RequestsScraper:
         if not parsed:
             return None
 
-        print(f"🧵 All spec table materials: {[m['name'] for m in parsed]}")
+        print(f" All spec table materials: {[m['name'] for m in parsed]}")
         return {'materials': parsed}
 
     def _extract_origin_from_title(self, title: str) -> str:
@@ -1667,7 +1667,7 @@ class RequestsScraper:
                     value = self._normalize_extraction_text(td.get_text(' ', strip=True))
                     normalized = normalize_country_name(value)
                     if normalized != "Unknown":
-                        print(f"🌍 Spec table origin (th/td): '{value}' → '{normalized}'")
+                        print(f" Spec table origin (th/td): '{value}' → '{normalized}'")
                         return normalized
 
         # Method 2: Detail bullets
@@ -1683,7 +1683,7 @@ class RequestsScraper:
                         candidate = match.group(1).strip().strip('‎').strip()
                         normalized = normalize_country_name(candidate)
                         if normalized != "Unknown":
-                            print(f"🌍 Detail bullets origin: '{candidate}' → '{normalized}'")
+                            print(f" Detail bullets origin: '{candidate}' → '{normalized}'")
                             return normalized
 
         # Method 3: po-attribute-list
@@ -1697,7 +1697,7 @@ class RequestsScraper:
                 value = self._normalize_extraction_text(value_el.get_text(' ', strip=True))
                 normalized = normalize_country_name(value)
                 if normalized != "Unknown":
-                    print(f"🌍 po-attribute origin: '{value}' → '{normalized}'")
+                    print(f" po-attribute origin: '{value}' → '{normalized}'")
                     return normalized
 
         return "Unknown"
