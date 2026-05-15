@@ -1,20 +1,4 @@
-"""
-Enterprise Dashboard API Routes
-==============================
-
-Professional carbon intelligence dashboard for enterprise customers.
-Designed for Series A demo-ready presentation to VCs and enterprise buyers.
-
-Features:
-- Executive summary with KPI cards
-- Interactive carbon analytics and trends  
-- Supplier sustainability scoring and rankings
-- Category-based emissions breakdowns
-- Compliance reporting and export capabilities
-- Real-time carbon intelligence insights
-
-Inspiration: Salesforce Analytics + Watershed + Power BI, but superior with real Amazon data.
-"""
+"""Enterprise dashboard API routes for carbon analytics."""
 
 from flask import Blueprint, jsonify, request, send_file
 from datetime import datetime, timedelta
@@ -44,7 +28,6 @@ try:
 except ImportError:
     ENHANCED_FEATURES_AVAILABLE = False
 
-# Blueprint for enterprise dashboard routes
 enterprise_bp = Blueprint('enterprise_dashboard', __name__, url_prefix='/api/enterprise')
 
 def load_enterprise_data():
@@ -79,39 +62,33 @@ def load_material_insights():
 
 @enterprise_bp.route('/dashboard/overview', methods=['GET'])
 def get_dashboard_overview():
-    """
-    Executive Summary Dashboard - The first thing C-suite executives see
-    
-    Returns comprehensive KPI cards and overview metrics for enterprise customers.
-    Designed to impress VCs and show immediate business value.
-    """
+    """Dashboard KPI overview."""
     try:
         df = load_enterprise_data()
-        
+
         if df.empty:
             return jsonify({
                 'error': 'No data available',
                 'status': 'error'
             }), 500
-        
-        # Calculate executive KPIs - using correct column names
+
+        # KPIs
         total_products = len(df)
         avg_carbon_footprint = df['co2_emissions'].mean() if 'co2_emissions' in df.columns else 0
         total_suppliers = df['origin'].nunique() if 'origin' in df.columns else 0
-        
-        # Calculate sustainability scores
+
+        # Sustainability
         high_sustainability_count = len(df[df.get('recyclability', '') == 'High']) if 'recyclability' in df.columns else 0
         sustainability_percentage = (high_sustainability_count / total_products * 100) if total_products > 0 else 0
-        
-        # Carbon intensity by category - using inferred_category
+
+        # Carbon by category
         category_emissions = {}
         if 'inferred_category' in df.columns and 'co2_emissions' in df.columns:
             category_emissions = df.groupby('inferred_category')['co2_emissions'].mean().round(2).to_dict()
-        
-        # Top carbon hotspots (worst performing products)
+
+        # Top emitters
         carbon_hotspots = []
         if 'co2_emissions' in df.columns and 'title' in df.columns:
-            # Get products with highest emissions
             top_emitters_df = df.nlargest(5, 'co2_emissions')[['title', 'co2_emissions', 'origin']].copy()
             carbon_hotspots = [
                 {
@@ -121,34 +98,33 @@ def get_dashboard_overview():
                 }
                 for _, row in top_emitters_df.iterrows()
             ]
-        
-        # Supplier sustainability rankings - using origin as supplier
+
+        # Supplier rankings
         supplier_rankings = []
         if 'origin' in df.columns and 'co2_emissions' in df.columns:
             supplier_data = df.groupby('origin').agg({
                 'co2_emissions': ['mean', 'count'],
                 'recyclability': lambda x: (x == 'High').sum() / len(x) * 100 if len(x) > 0 else 0
             }).round(2)
-            
+
             supplier_data.columns = ['avg_carbon', 'product_count', 'sustainability_score']
             supplier_data = supplier_data.reset_index()
             supplier_data = supplier_data.sort_values('sustainability_score', ascending=False).head(10)
-            
+
             supplier_rankings = supplier_data.to_dict('records')
-        
-        # Monthly trends (simulated for demo - would be real historical data in production)
+
+        # Monthly trends (simulated)
         monthly_trends = []
         base_date = datetime.now() - timedelta(days=180)
         for i in range(6):
             month_date = base_date + timedelta(days=30*i)
-            # Simulate improving trend for demo
-            trend_value = avg_carbon_footprint * (1 - i*0.05)  # 5% improvement each month
+            trend_value = avg_carbon_footprint * (1 - i*0.05)  # 5% simulated improvement per month
             monthly_trends.append({
                 'month': month_date.strftime('%Y-%m'),
                 'avg_carbon_kg': round(max(trend_value, avg_carbon_footprint * 0.7), 2),  # Floor at 30% improvement
                 'products_analyzed': total_products + i*1000  # Growing dataset
             })
-        
+
         dashboard_data = {
             'status': 'success',
             'timestamp': datetime.now().isoformat(),
@@ -176,9 +152,9 @@ def get_dashboard_overview():
                 'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M')
             }
         }
-        
+
         return jsonify(dashboard_data)
-        
+
     except Exception as e:
         return jsonify({
             'error': f'Dashboard overview error: {str(e)}',
@@ -187,19 +163,13 @@ def get_dashboard_overview():
 
 @enterprise_bp.route('/analytics/carbon-trends', methods=['GET'])
 def get_carbon_analytics():
-    """
-    Advanced Carbon Analytics - Interactive charts and deep insights
-    
-    Provides detailed carbon footprint analysis with trends, breakdowns, and benchmarks.
-    Designed for sustainability managers and procurement teams.
-    """
+    """Carbon trends, breakdowns, and reduction opportunities."""
     try:
         df = load_enterprise_data()
-        
+
         if df.empty:
             return jsonify({'error': 'No data available'}), 500
-        
-        # Carbon distribution by categories - using correct column names
+
         category_analysis = {}
         if 'inferred_category' in df.columns and 'co2_emissions' in df.columns:
             category_stats = df.groupby('inferred_category')['co2_emissions'].agg(['mean', 'std', 'count']).round(2)
@@ -212,8 +182,7 @@ def get_carbon_analytics():
                 }
                 for category, stats in category_stats.iterrows()
             }
-        
-        # Material impact analysis
+
         material_impact = {}
         if 'material' in df.columns and 'co2_emissions' in df.columns:
             material_stats = df.groupby('material')['co2_emissions'].agg(['mean', 'count']).round(2)
@@ -225,8 +194,7 @@ def get_carbon_analytics():
                 }
                 for material, stats in material_stats.iterrows()
             }
-        
-        # Transportation impact analysis
+
         transport_analysis = {}
         if 'transport' in df.columns and 'co2_emissions' in df.columns:
             transport_stats = df.groupby('transport')['co2_emissions'].agg(['mean', 'count']).round(2)
@@ -238,11 +206,8 @@ def get_carbon_analytics():
                 }
                 for transport, stats in transport_stats.iterrows()
             }
-        
-        # Carbon reduction opportunities
+
         reduction_opportunities = []
-        
-        # Identify high-carbon categories with alternatives
         if category_analysis:
             for category, data in category_analysis.items():
                 if data['avg_carbon_kg'] > df['co2_emissions'].mean():
@@ -255,10 +220,9 @@ def get_carbon_analytics():
                         'action': f'Switch to lower-carbon alternatives in {category}',
                         'business_impact': 'High' if potential_saving > 1000 else 'Medium'
                     })
-        
-        # Sort opportunities by potential impact
+
         reduction_opportunities.sort(key=lambda x: x['potential_carbon_saved'], reverse=True)
-        
+
         analytics_data = {
             'status': 'success',
             'timestamp': datetime.now().isoformat(),
@@ -282,9 +246,9 @@ def get_carbon_analytics():
                 'improvement_target': round(df['co2_emissions'].mean() * 0.85, 2) if 'co2_emissions' in df.columns else 0
             }
         }
-        
+
         return jsonify(analytics_data)
-        
+
     except Exception as e:
         return jsonify({
             'error': f'Carbon analytics error: {str(e)}',
@@ -293,69 +257,56 @@ def get_carbon_analytics():
 
 @enterprise_bp.route('/suppliers/sustainability-scoring', methods=['GET'])
 def get_supplier_analysis():
-    """
-    Supplier Sustainability Intelligence - Advanced supplier scoring and rankings
-    
-    Provides comprehensive supplier sustainability analysis with scoring, rankings,
-    and actionable insights for procurement teams.
-    """
+    """Supplier sustainability scores and rankings."""
     try:
         df = load_enterprise_data()
         brand_locations = load_brand_locations()
         material_insights = load_material_insights()
-        
+
         if df.empty:
             return jsonify({'error': 'No data available'}), 500
-        
-        # Calculate comprehensive supplier scores
+
         supplier_scores = {}
-        
+
         if 'origin' in df.columns:
             for brand in df['origin'].unique():
                 if pd.isna(brand):
                     continue
                 brand_data = df[df['origin'] == brand]
-                
-                # Carbon performance score (0-100, higher is better)
+
                 avg_carbon = brand_data['co2_emissions'].mean() if 'co2_emissions' in brand_data.columns else 0
                 carbon_score = max(0, 100 - (avg_carbon * 5))  # Penalize high carbon
-                
-                # Recyclability score
+
                 recyclability_score = 0
                 if 'recyclability' in brand_data.columns:
                     recyclable_count = (brand_data['recyclability'] == 'High').sum()
                     recyclability_score = (recyclable_count / len(brand_data)) * 100
-                
-                # Material sustainability score
-                material_score = 50  # Default neutral score
+
+                material_score = 50  # neutral default
                 if 'material' in brand_data.columns:
                     brand_materials = brand_data['material'].value_counts()
                     sustainable_materials = ['bamboo', 'hemp', 'organic cotton', 'recycled steel', 'cork']
                     sustainable_count = sum(brand_materials.get(mat, 0) for mat in sustainable_materials)
                     material_score = min(100, (sustainable_count / len(brand_data)) * 200)  # Boost for sustainable materials
-                
-                # Geographic diversity score (lower carbon footprint from diverse supply chains)
-                geographic_score = 50  # Default
+
+                geographic_score = 50
                 if brand in brand_locations:
-                    # Bonus for having local/regional presence
                     origin = brand_locations[brand].get('origin', '').lower()
                     if origin in ['uk', 'united kingdom', 'europe']:
                         geographic_score = 75
                     elif origin in ['usa', 'canada', 'north america']:
                         geographic_score = 65
-                
-                # Overall sustainability score (weighted average)
+
                 overall_score = (
                     carbon_score * 0.4 +          # 40% weight on carbon performance
                     recyclability_score * 0.25 +   # 25% weight on recyclability
                     material_score * 0.25 +        # 25% weight on materials
                     geographic_score * 0.1         # 10% weight on geography
                 )
-                
-                # Product volume and diversity
+
                 product_count = len(brand_data)
                 category_diversity = brand_data['category'].nunique() if 'category' in brand_data.columns else 1
-                
+
                 supplier_scores[brand] = {
                     'overall_score': round(overall_score, 1),
                     'carbon_performance': round(carbon_score, 1),
@@ -369,11 +320,9 @@ def get_supplier_analysis():
                     'origin_country': brand_locations.get(brand, {}).get('origin', 'Unknown'),
                     'improvement_areas': get_improvement_recommendations(carbon_score, recyclability_score, material_score)
                 }
-        
-        # Rank suppliers by overall score
+
         ranked_suppliers = sorted(supplier_scores.items(), key=lambda x: x[1]['overall_score'], reverse=True)
-        
-        # Category-wise best performers
+
         category_leaders = {}
         if 'category' in df.columns:
             for category in df['category'].unique():
@@ -386,14 +335,13 @@ def get_supplier_analysis():
                             'score': supplier_scores[best_brand]['overall_score'],
                             'carbon_kg': supplier_scores[best_brand]['avg_carbon_kg']
                         }
-        
-        # Risk assessment
+
         high_risk_suppliers = [
             {'brand': brand, 'score': data['overall_score'], 'risk_factors': data['improvement_areas']}
             for brand, data in ranked_suppliers
             if data['overall_score'] < 30
         ]
-        
+
         supplier_analysis = {
             'status': 'success',
             'timestamp': datetime.now().isoformat(),
@@ -419,9 +367,9 @@ def get_supplier_analysis():
             },
             'actionable_insights': generate_supplier_insights(ranked_suppliers, high_risk_suppliers)
         }
-        
+
         return jsonify(supplier_analysis)
-        
+
     except Exception as e:
         return jsonify({
             'error': f'Supplier analysis error: {str(e)}',
@@ -448,27 +396,27 @@ def get_sustainability_grade(score):
 def get_improvement_recommendations(carbon_score, recyclability_score, material_score):
     """Generate specific improvement recommendations."""
     recommendations = []
-    
+
     if carbon_score < 50:
         recommendations.append("High carbon footprint - explore lower-carbon alternatives")
     if recyclability_score < 30:
         recommendations.append("Low recyclability - prioritize circular design")
     if material_score < 40:
         recommendations.append("Material sustainability - switch to eco-friendly materials")
-    
+
     return recommendations if recommendations else ["Good performance across key metrics"]
 
 def generate_supplier_insights(ranked_suppliers, high_risk_suppliers):
     """Generate actionable business insights."""
     insights = []
-    
+
     if len(ranked_suppliers) > 0:
         top_supplier = ranked_suppliers[0]
         insights.append(f"Top performer: {top_supplier[0]} with {top_supplier[1]['overall_score']}% sustainability score")
-    
+
     if high_risk_suppliers:
         insights.append(f"{len(high_risk_suppliers)} suppliers need immediate attention for sustainability compliance")
-    
+
     # Calculate potential savings
     if len(ranked_suppliers) > 10:
         avg_top_10 = sum(data['avg_carbon_kg'] for _, data in ranked_suppliers[:10]) / 10
@@ -476,57 +424,50 @@ def generate_supplier_insights(ranked_suppliers, high_risk_suppliers):
         potential_reduction = avg_bottom_10 - avg_top_10
         if potential_reduction > 0:
             insights.append(f"Switching to top-tier suppliers could reduce carbon footprint by {potential_reduction:.1f} kg CO2 per product")
-    
+
     return insights
 
 @enterprise_bp.route('/reports/export', methods=['POST'])
 def export_compliance_report():
-    """
-    Export Compliance Reports - Generate downloadable reports for regulatory compliance
-    
-    Supports multiple formats (CSV, Excel, PDF) for different compliance frameworks.
-    """
+    """Export compliance data as CSV or Excel."""
     try:
         request_data = request.get_json() or {}
         export_format = request_data.get('format', 'csv').lower()
         report_type = request_data.get('type', 'full_analysis')
-        
+
         df = load_enterprise_data()
-        
+
         if df.empty:
             return jsonify({'error': 'No data available for export'}), 500
-        
-        # Prepare compliance data
+
         compliance_data = df.copy()
-        
-        # Add compliance-specific columns
         compliance_data['scope_3_category'] = 'Purchased Goods and Services'
         compliance_data['reporting_period'] = datetime.now().strftime('%Y')
         compliance_data['data_quality'] = 'Primary Data'
         compliance_data['verification_status'] = 'Third-party Verified'
-        
+
         if export_format == 'csv':
             output = io.StringIO()
             compliance_data.to_csv(output, index=False)
             output.seek(0)
-            
+
             return jsonify({
                 'status': 'success',
                 'download_url': '/api/enterprise/reports/download/csv',
                 'filename': f'carbon_intelligence_report_{datetime.now().strftime("%Y%m%d")}.csv',
                 'record_count': len(compliance_data)
             })
-        
+
         elif export_format == 'excel':
             return jsonify({
                 'status': 'success',
                 'message': 'Excel export feature coming soon',
                 'alternative': 'Use CSV export for now'
             })
-        
+
         else:
             return jsonify({'error': 'Unsupported export format'}), 400
-            
+
     except Exception as e:
         return jsonify({
             'error': f'Export error: {str(e)}',
@@ -535,14 +476,8 @@ def export_compliance_report():
 
 @enterprise_bp.route('/demo/series-a-data', methods=['GET'])
 def get_series_a_demo_data():
-    """
-    Series A Demo Data - Curated data specifically for investor presentations
-    
-    Returns impressive, realistic data that showcases platform capabilities
-    for venture capital presentations and enterprise customer demos.
-    """
+    """Demo endpoint returning platform overview data."""
     try:
-        # Curated demo data that tells a compelling story
         demo_data = {
             'status': 'success',
             'demo_timestamp': datetime.now().isoformat(),
@@ -598,9 +533,9 @@ def get_series_a_demo_data():
                 'defensibility': 'Data network effects + AI models'
             }
         }
-        
+
         return jsonify(demo_data)
-        
+
     except Exception as e:
         return jsonify({
             'error': f'Demo data error: {str(e)}',

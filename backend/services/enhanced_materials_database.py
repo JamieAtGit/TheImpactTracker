@@ -1,32 +1,19 @@
 #!/usr/bin/env python3
-"""
-Enhanced Materials Database with Research-Verified CO2 Intensity Values
-Comprehensive database of materials with accurate environmental impact data
-"""
+"""Materials database with CO2 intensity values and product categories."""
 
 from typing import Dict, List, Tuple, Any
 
 class EnhancedMaterialsDatabase:
-    """
-    Research-verified materials database with accurate CO2 intensity values
-    Based on LCA studies and peer-reviewed environmental impact research
-    """
-    
+
     def __init__(self):
         self.materials_database = self.build_comprehensive_materials_db()
         self.product_categories = self.build_enhanced_product_categories()
-    
+
     def build_comprehensive_materials_db(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Build comprehensive materials database with verified CO2 intensity values
-        All values researched from LCA studies and scientific literature
-        """
-        
         return {
-            
-            # ========== METALS (HIGH CO2 INTENSITY) ==========
-            
-            # Ferrous Metals
+            # Metals
+
+            # Ferrous
             "steel": {
                 "co2_intensity": 2.0,
                 "category": "ferrous_metal",
@@ -39,7 +26,7 @@ class EnhancedMaterialsDatabase:
             "stainless_steel": {
                 "co2_intensity": 2.8,
                 "category": "ferrous_metal",
-                "confidence": "high", 
+                "confidence": "high",
                 "recyclability": "high",
                 "source": "ISSF LCA data",
                 "applications": ["kitchen equipment", "medical devices", "architecture"],
@@ -54,11 +41,11 @@ class EnhancedMaterialsDatabase:
                 "applications": ["cookware", "pipes", "automotive parts"],
                 "alternative_names": ["iron", "grey iron"]
             },
-            
-            # Non-Ferrous Metals
+
+            # Non-ferrous
             "aluminum": {
                 "co2_intensity": 9.2,
-                "category": "non_ferrous_metal", 
+                "category": "non_ferrous_metal",
                 "confidence": "high",
                 "recyclability": "very_high",
                 "source": "International Aluminium Institute",
@@ -70,7 +57,7 @@ class EnhancedMaterialsDatabase:
                 "co2_intensity": 4.5,
                 "category": "non_ferrous_metal",
                 "confidence": "high",
-                "recyclability": "very_high", 
+                "recyclability": "very_high",
                 "source": "Copper Alliance LCA",
                 "applications": ["electrical", "plumbing", "electronics"],
                 "alternative_names": ["cu"]
@@ -93,9 +80,9 @@ class EnhancedMaterialsDatabase:
                 "applications": ["aerospace", "medical implants", "premium products"],
                 "alternative_names": ["ti", "grade_5_titanium"]
             },
-            
-            # ========== ADVANCED FIBERS (VERY HIGH CO2) ==========
-            
+
+            # Advanced Fibers
+
             # Carbon-Based Fibers
             "carbon_fiber": {
                 "co2_intensity": 22.5,
@@ -116,7 +103,7 @@ class EnhancedMaterialsDatabase:
                 "applications": ["electronics", "composites", "research"],
                 "alternative_names": ["graphene_oxide"]
             },
-            
+
             # Aramid Fibers
             "kevlar": {
                 "co2_intensity": 7.5,
@@ -129,14 +116,14 @@ class EnhancedMaterialsDatabase:
             },
             "nomex": {
                 "co2_intensity": 7.5,
-                "category": "aramid_fiber", 
+                "category": "aramid_fiber",
                 "confidence": "medium",
                 "recyclability": "medium",
                 "source": "Estimated similar to aramid family",
                 "applications": ["fire protection", "aerospace insulation"],
                 "alternative_names": ["meta_aramid"]
             },
-            
+
             # Ultra-High Performance Polyethylene
             "dyneema": {
                 "co2_intensity": 5.8,
@@ -147,9 +134,9 @@ class EnhancedMaterialsDatabase:
                 "applications": ["ropes", "ballistic protection", "marine"],
                 "alternative_names": ["uhmwpe", "spectra"]
             },
-            
-            # ========== NATURAL ANIMAL FIBERS (VARIABLE CO2) ==========
-            
+
+            # Natural Animal Fibers
+
             # Luxury Animal Fibers (HIGHEST IMPACT)
             "cashmere": {
                 "co2_intensity": 385.5,
@@ -216,7 +203,7 @@ class EnhancedMaterialsDatabase:
                 "applications": ["insulation", "bedding", "outdoor gear"],
                 "alternative_names": ["goose_down", "duck_down"]
             },
-            
+
             # Leather
             "leather": {
                 "co2_intensity": 12.0,
@@ -227,9 +214,9 @@ class EnhancedMaterialsDatabase:
                 "applications": ["footwear", "accessories", "furniture"],
                 "alternative_names": ["genuine_leather", "full_grain"]
             },
-            
-            # ========== PLANT-BASED NATURAL FIBERS (LOW CO2) ==========
-            
+
+            # Plant-Based Natural Fibers
+
             # Traditional Plant Fibers
             "cotton": {
                 "co2_intensity": 2.1,
@@ -288,9 +275,9 @@ class EnhancedMaterialsDatabase:
                 "alternative_names": ["bamboo_viscose", "bamboo_lyocell"],
                 "environmental_notes": "Processing method affects impact"
             },
-            
-            # ========== WOOD-BASED MATERIALS (LOW CO2) ==========
-            
+
+            # Wood-Based Materials
+
             # Natural Wood
             "wood": {
                 "co2_intensity": 0.4,
@@ -320,7 +307,7 @@ class EnhancedMaterialsDatabase:
                 "applications": ["wine corks", "flooring", "insulation"],
                 "environmental_notes": "Renewable harvest, doesn't harm tree"
             },
-            
+
             # Engineered Wood
             "plywood": {
                 "co2_intensity": 0.6,
@@ -331,9 +318,9 @@ class EnhancedMaterialsDatabase:
                 "applications": ["construction", "furniture", "packaging"],
                 "environmental_notes": "Includes adhesive impacts"
             },
-            
-            # ========== SYNTHETIC MATERIALS (MEDIUM-HIGH CO2) ==========
-            
+
+            # Synthetic Materials
+
             # Common Thermoplastics
             "plastic": {
                 "co2_intensity": 3.5,
@@ -355,7 +342,7 @@ class EnhancedMaterialsDatabase:
             },
             "polyethylene": {
                 "co2_intensity": 2.8,
-                "category": "thermoplastic", 
+                "category": "thermoplastic",
                 "confidence": "high",
                 "recyclability": "high",
                 "source": "PlasticsEurope LCA",
@@ -398,7 +385,7 @@ class EnhancedMaterialsDatabase:
                 "applications": ["textiles", "automotive", "industrial"],
                 "alternative_names": ["polyamide", "pa6", "pa66"]
             },
-            
+
             # High-Performance Polymers
             "ptfe": {
                 "co2_intensity": 9.6,
@@ -409,7 +396,7 @@ class EnhancedMaterialsDatabase:
                 "applications": ["non-stick coatings", "gaskets", "chemical equipment"],
                 "alternative_names": ["teflon", "polytetrafluoroethylene"]
             },
-            
+
             # Synthetic Textiles
             "polyester": {
                 "co2_intensity": 3.8,
@@ -439,9 +426,9 @@ class EnhancedMaterialsDatabase:
                 "applications": ["sweaters", "blankets", "outdoor fabrics"],
                 "alternative_names": ["acrylic_fiber"]
             },
-            
-            # ========== SEMI-SYNTHETIC SUSTAINABLE (LOW CO2) ==========
-            
+
+            # Semi-Synthetic Sustainable
+
             # Cellulose-Based
             "lyocell": {
                 "co2_intensity": 0.05,
@@ -473,9 +460,9 @@ class EnhancedMaterialsDatabase:
                 "alternative_names": ["rayon"],
                 "environmental_notes": "Chemical-intensive process"
             },
-            
-            # ========== RUBBER & ELASTOMERS (MEDIUM CO2) ==========
-            
+
+            # Rubber & Elastomers
+
             "rubber": {
                 "co2_intensity": 2.8,
                 "category": "elastomer",
@@ -503,9 +490,9 @@ class EnhancedMaterialsDatabase:
                 "applications": ["wetsuits", "gaskets", "insulation"],
                 "alternative_names": ["chloroprene_rubber"]
             },
-            
-            # ========== FOAM MATERIALS (MEDIUM CO2) ==========
-            
+
+            # Foam Materials
+
             "foam": {
                 "co2_intensity": 2.8,
                 "category": "foam",
@@ -524,9 +511,9 @@ class EnhancedMaterialsDatabase:
                 "applications": ["mattresses", "pillows", "seating"],
                 "alternative_names": ["natural_latex"]
             },
-            
-            # ========== GLASS & CERAMICS (MEDIUM CO2) ==========
-            
+
+            # Glass & Ceramics
+
             "glass": {
                 "co2_intensity": 1.3,
                 "category": "ceramic_glass",
@@ -564,9 +551,9 @@ class EnhancedMaterialsDatabase:
                 "applications": ["pottery", "construction", "crafts"],
                 "alternative_names": ["terracotta"]
             },
-            
-            # ========== PAPER & CARDBOARD (LOW CO2) ==========
-            
+
+            # Paper & Cardboard
+
             "paper": {
                 "co2_intensity": 0.7,
                 "category": "paper",
@@ -586,9 +573,9 @@ class EnhancedMaterialsDatabase:
                 "applications": ["packaging", "shipping", "displays"],
                 "alternative_names": ["corrugated_cardboard", "paperboard"]
             },
-            
-            # ========== ALTERNATIVE/INNOVATIVE MATERIALS (VARIABLE CO2) ==========
-            
+
+            # Alternative/Innovative Materials
+
             # Bio-Based Alternatives
             "mycelium": {
                 "co2_intensity": 0.8,
@@ -602,7 +589,7 @@ class EnhancedMaterialsDatabase:
             },
             "pinatex": {
                 "co2_intensity": 1.2,
-                "category": "bio_material", 
+                "category": "bio_material",
                 "confidence": "low",
                 "recyclability": "medium",
                 "source": "Estimated from pineapple waste processing",
@@ -620,7 +607,7 @@ class EnhancedMaterialsDatabase:
                 "alternative_names": ["cork_fabric"],
                 "environmental_notes": "Renewable harvest"
             },
-            
+
             # Bio-Plastics
             "pla": {
                 "co2_intensity": 1.7,
@@ -642,9 +629,9 @@ class EnhancedMaterialsDatabase:
                 "alternative_names": ["polyhydroxyalkanoate"],
                 "environmental_notes": "Marine biodegradable"
             },
-            
-            # ========== COMPOSITE & MIXED MATERIALS ==========
-            
+
+            # Composite & Mixed Materials
+
             "mixed": {
                 "co2_intensity": 2.5,
                 "category": "composite",
@@ -664,17 +651,17 @@ class EnhancedMaterialsDatabase:
                 "environmental_notes": "Default fallback value"
             }
         }
-    
+
     def build_enhanced_product_categories(self) -> Dict[str, Dict[str, Any]]:
         """
         Enhanced product categories with verified material compositions
         Based on extensive industry research and material usage patterns
         """
-        
+
         return {
-            
-            # ========== PROFESSIONAL & SCIENTIFIC EQUIPMENT ==========
-            
+
+            # Professional & Scientific Equipment
+
             # Laboratory Equipment
             "laboratory_equipment": {
                 "typical_materials": ["stainless_steel", "glass", "plastic"],
@@ -697,7 +684,7 @@ class EnhancedMaterialsDatabase:
                 "confidence": "medium",
                 "applications": ["chromatography", "mass spectrometry", "chemical analysis"]
             },
-            
+
             # Medical Equipment
             "medical_devices": {
                 "typical_materials": ["stainless_steel", "plastic", "titanium", "glass"],
@@ -720,7 +707,7 @@ class EnhancedMaterialsDatabase:
                 "confidence": "medium",
                 "applications": ["imaging equipment", "monitors", "testing devices"]
             },
-            
+
             # Industrial Equipment
             "industrial_machinery": {
                 "typical_materials": ["steel", "cast_iron", "aluminum"],
@@ -736,9 +723,9 @@ class EnhancedMaterialsDatabase:
                 "confidence": "high",
                 "applications": ["cutting tools", "measuring instruments", "calibration equipment"]
             },
-            
-            # ========== HIGH-PERFORMANCE SPORTS EQUIPMENT ==========
-            
+
+            # High-Performance Sports Equipment
+
             # Aerospace Sports
             "climbing_equipment": {
                 "typical_materials": ["aluminum", "nylon", "dyneema"],
@@ -761,7 +748,7 @@ class EnhancedMaterialsDatabase:
                 "confidence": "medium",
                 "applications": ["parachutes", "harnesses", "altimeters"]
             },
-            
+
             # Water Sports
             "scuba_diving_gear": {
                 "typical_materials": ["aluminum", "neoprene", "stainless_steel", "plastic"],
@@ -784,7 +771,7 @@ class EnhancedMaterialsDatabase:
                 "confidence": "medium",
                 "applications": ["surfboards", "wakeboards", "kiteboards"]
             },
-            
+
             # Winter Sports
             "skiing_equipment": {
                 "typical_materials": ["carbon_fiber", "aluminum", "polyethylene", "steel"],
@@ -800,7 +787,7 @@ class EnhancedMaterialsDatabase:
                 "confidence": "high",
                 "applications": ["snowboards", "bindings", "boots"]
             },
-            
+
             # Precision Sports
             "archery_equipment": {
                 "typical_materials": ["carbon_fiber", "aluminum", "wood", "synthetic_materials"],
@@ -816,9 +803,9 @@ class EnhancedMaterialsDatabase:
                 "confidence": "medium",
                 "applications": ["training equipment", "protective gear", "weapons"]
             },
-            
-            # ========== CREATIVE & ARTISTIC EQUIPMENT ==========
-            
+
+            # Creative & Artistic Equipment
+
             # Film & Photography
             "professional_cameras": {
                 "typical_materials": ["aluminum", "magnesium", "glass", "electronics"],
@@ -841,7 +828,7 @@ class EnhancedMaterialsDatabase:
                 "confidence": "high",
                 "applications": ["microphones", "speakers", "mixing boards", "headphones"]
             },
-            
+
             # Art Supplies
             "fine_art_supplies": {
                 "typical_materials": ["wood", "metal", "paper", "glass"],
@@ -864,9 +851,9 @@ class EnhancedMaterialsDatabase:
                 "confidence": "medium",
                 "applications": ["tools", "findings", "equipment", "materials"]
             },
-            
-            # ========== SPECIALIZED HOBBY EQUIPMENT ==========
-            
+
+            # Specialized Hobby Equipment
+
             # Model Making
             "model_building": {
                 "typical_materials": ["plastic", "metal", "wood", "paper"],
@@ -889,7 +876,7 @@ class EnhancedMaterialsDatabase:
                 "confidence": "high",
                 "applications": ["frames", "propellers", "cameras", "controllers"]
             },
-            
+
             # Electronics Hobby
             "electronics_components": {
                 "typical_materials": ["silicon", "copper", "plastic", "ceramic"],
@@ -905,7 +892,7 @@ class EnhancedMaterialsDatabase:
                 "confidence": "medium",
                 "applications": ["printers", "filaments", "tools", "accessories"]
             },
-            
+
             # Collecting & Restoration
             "antique_restoration": {
                 "typical_materials": ["wood", "metal", "leather", "fabric"],
@@ -921,9 +908,9 @@ class EnhancedMaterialsDatabase:
                 "confidence": "medium",
                 "applications": ["display cases", "storage boxes", "protective materials"]
             },
-            
-            # ========== SPECIALIZED TEXTILES ==========
-            
+
+            # Specialized Textiles
+
             # Technical Textiles
             "technical_fabrics": {
                 "typical_materials": ["carbon_fiber", "aramid_fiber", "polyester", "nylon"],
@@ -946,7 +933,7 @@ class EnhancedMaterialsDatabase:
                 "confidence": "high",
                 "applications": ["tents", "sleeping bags", "backpacks", "clothing"]
             },
-            
+
             # Luxury Textiles
             "luxury_fabrics": {
                 "typical_materials": ["silk", "cashmere", "merino_wool", "cotton"],
@@ -963,32 +950,32 @@ class EnhancedMaterialsDatabase:
                 "applications": ["eco-friendly clothing", "sustainable fashion"]
             }
         }
-    
+
     def get_material_impact_score(self, material_name: str) -> float:
         """Get CO2 intensity for a specific material"""
         material_data = self.materials_database.get(material_name.lower().replace(' ', '_'))
         if material_data:
             return material_data['co2_intensity']
         return 2.0  # Default fallback
-    
+
     def get_category_impact_score(self, category_name: str) -> float:
         """Get average CO2 intensity for a product category"""
         category_data = self.product_categories.get(category_name.lower().replace(' ', '_'))
         if category_data:
             return category_data['avg_co2_intensity']
         return 2.5  # Default fallback
-    
+
     def get_material_confidence(self, material_name: str) -> str:
         """Get confidence level for material data"""
         material_data = self.materials_database.get(material_name.lower().replace(' ', '_'))
         if material_data:
             return material_data['confidence']
         return 'low'
-    
+
     def export_database(self, filename: str = "enhanced_materials_database.json"):
         """Export the enhanced materials database to JSON"""
         import json
-        
+
         export_data = {
             'materials': self.materials_database,
             'categories': self.product_categories,
@@ -999,19 +986,19 @@ class EnhancedMaterialsDatabase:
                 'research_date': '2025-01-27',
                 'sources': [
                     'LCA studies',
-                    'Industry reports', 
+                    'Industry reports',
                     'Scientific literature',
                     'Sustainability databases'
                 ]
             }
         }
-        
+
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(export_data, f, indent=2, ensure_ascii=False)
-        
-        print(f"✅ Enhanced materials database exported to {filename}")
-        print(f"📊 Materials: {len(self.materials_database)}")
-        print(f"📊 Categories: {len(self.product_categories)}")
+
+        print(f" Enhanced materials database exported to {filename}")
+        print(f" Materials: {len(self.materials_database)}")
+        print(f" Categories: {len(self.product_categories)}")
 
 if __name__ == "__main__":
     # Build and export enhanced materials database

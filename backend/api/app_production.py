@@ -316,7 +316,7 @@ def _seed_products_from_csv():
 
         dataset_path = os.path.join(BASE_DIR, 'common', 'data', 'csv', 'expanded_eco_dataset.csv')
         if not os.path.exists(dataset_path):
-            print(f"⚠️ CSV not found at {dataset_path} — cannot seed products table.")
+            print(f" CSV not found at {dataset_path} — cannot seed products table.")
             return
 
         df = pd.read_csv(dataset_path)
@@ -328,18 +328,18 @@ def _seed_products_from_csv():
             existing = conn.execute(_text("SELECT COUNT(*) FROM products")).scalar() or 0
 
         if existing >= int(expected * 0.99):
-            print(f"ℹ️ Products table already has {existing}/{expected} rows — skipping seed.")
+            print(f"ℹ Products table already has {existing}/{expected} rows — skipping seed.")
             return
 
         if existing > 0:
-            print(f"⚠️ Partial seed detected ({existing}/{expected} rows). Clearing and re-seeding...")
+            print(f" Partial seed detected ({existing}/{expected} rows). Clearing and re-seeding...")
             with db.engine.begin() as conn:
                 conn.execute(_text("DELETE FROM products"))
 
         records = df.to_dict(orient='records')
         BATCH = 5000
         total = len(records)
-        print(f"🌱 Seeding {total} products into DB from CSV...")
+        print(f" Seeding {total} products into DB from CSV...")
 
         insert_sql = _text("""
             INSERT INTO products
@@ -371,14 +371,14 @@ def _seed_products_from_csv():
                 continue
             with db.engine.begin() as conn:   # auto-commits on exit, rolls back on error
                 conn.execute(insert_sql, batch)
-            print(f"  ✅ Committed rows {i+1}–{min(i+BATCH, total)}")
+            print(f"   Committed rows {i+1}–{min(i+BATCH, total)}")
 
         with db.engine.begin() as conn:
             final_count = conn.execute(_text("SELECT COUNT(*) FROM products")).scalar()
-        print(f"🌱 Seeding complete — {final_count} products now in DB.")
+        print(f" Seeding complete — {final_count} products now in DB.")
 
     except Exception as e:
-        print(f"⚠️ Product seeding failed: {e}")
+        print(f" Product seeding failed: {e}")
         import traceback
         traceback.print_exc()
 
@@ -418,7 +418,7 @@ def _build_transport_breakdown(weight_kg: float, origin_km: float, uk_hub_km: fl
 def create_app(config_name='production'):
     """Application factory pattern"""
     app = Flask(__name__)
-    
+
     # Configuration
     if config_name == 'production':
         # Railway MySQL connection - build DATABASE_URL from individual components
@@ -427,30 +427,30 @@ def create_app(config_name='production'):
         mysql_user = os.getenv('MYSQL_USER')
         mysql_password = os.getenv('MYSQL_PASSWORD')
         mysql_database = os.getenv('MYSQL_DATABASE')
-        
+
         if all([mysql_host, mysql_port, mysql_user, mysql_password, mysql_database]):
             database_url = f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_database}"
             app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-            print(f"✅ MySQL connection configured: {mysql_host}:{mysql_port}/{mysql_database}")
+            print(f" MySQL connection configured: {mysql_host}:{mysql_port}/{mysql_database}")
         else:
             # Fallback to DATABASE_URL if available
             database_url = os.getenv('DATABASE_URL')
             if database_url:
                 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-                print(f"✅ Database URL configured from DATABASE_URL")
+                print(f" Database URL configured from DATABASE_URL")
             else:
                 # Stable fallback for production when DB env vars are missing
-                print("⚠️ No production DB env found. Falling back to local SQLite for service availability.")
+                print(" No production DB env found. Falling back to local SQLite for service availability.")
                 database_url = 'sqlite:///production_fallback.db'
                 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-                print("✅ SQLite fallback DB configured")
-        
+                print(" SQLite fallback DB configured")
+
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         _secret = os.getenv('FLASK_SECRET_KEY')
         if not _secret:
             import sys as _sys
             _sys.stderr.write(
-                "\n🚨  FLASK_SECRET_KEY is not set.\n"
+                "\n  FLASK_SECRET_KEY is not set.\n"
                 "    All user sessions will be invalidated on every restart.\n"
                 "    Set this environment variable in your deployment dashboard.\n\n"
             )
@@ -469,7 +469,7 @@ def create_app(config_name='production'):
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.config['SECRET_KEY'] = 'dev-key-change-in-production'
         app.config['DEBUG'] = True
-    
+
     # Initialize extensions
     db.init_app(app)
     _rate_limit_enabled = config_name == 'production'
@@ -483,7 +483,7 @@ def create_app(config_name='production'):
         migrate = Migrate(app, db)
     else:
         migrate = None
-        print("ℹ️ Skipping Flask-Migrate initialization in production startup (set ENABLE_DB_MIGRATIONS=1 to enable).")
+        print("ℹ Skipping Flask-Migrate initialization in production startup (set ENABLE_DB_MIGRATIONS=1 to enable).")
     CORS(
         app,
         supports_credentials=True,
@@ -520,7 +520,7 @@ def create_app(config_name='production'):
     if config_name != 'production' or run_db_bootstrap:
         with app.app_context():
             try:
-                print("🔄 Creating/verifying database tables...")
+                print(" Creating/verifying database tables...")
                 db.create_all()
                 # Add last_login column to existing deployments if missing
                 from sqlalchemy import text as _text
@@ -537,18 +537,18 @@ def create_app(config_name='production'):
                         with db.engine.connect() as _conn:
                             _conn.execute(_text(sql))
                             _conn.commit()
-                        print(f"✅ Added column {col}")
+                        print(f" Added column {col}")
                     except Exception:
                         pass  # Column already exists — ignore
-                print("✅ Database tables ready")
+                print(" Database tables ready")
                 _seed_products_from_csv()
             except Exception as e:
-                print(f"❌ Database setup error: {e}")
+                print(f" Database setup error: {e}")
                 import traceback
                 traceback.print_exc()
 
     else:
-        print("ℹ️ Skipping DB bootstrap in production startup (set RUN_DB_BOOTSTRAP=1 to enable).")
+        print("ℹ Skipping DB bootstrap in production startup (set RUN_DB_BOOTSTRAP=1 to enable).")
 
     # Seed admin user from env vars if no admin exists in DB (runs always)
     with app.app_context():
@@ -560,12 +560,12 @@ def create_app(config_name='production'):
                 admin_user.set_password(admin_password)
                 db.session.add(admin_user)
                 db.session.commit()
-                print(f"✅ Admin user '{admin_username}' created in database")
+                print(f" Admin user '{admin_username}' created in database")
             elif not admin_password:
-                print("ℹ️  ADMIN_PASSWORD not set — admin user not auto-created")
+                print("ℹ  ADMIN_PASSWORD not set — admin user not auto-created")
         except Exception as _ae:
-            print(f"⚠️  Admin seeding failed: {_ae}")
-    
+            print(f"  Admin seeding failed: {_ae}")
+
     # Load ML models
     # Unified ML assets directory (single location)
     ML_ASSETS_DIR = os.environ.get("ML_ASSETS_DIR", os.path.join(BASE_DIR, "ml"))
@@ -582,13 +582,13 @@ def create_app(config_name='production'):
         if os.path.exists(_conf_path):
             with open(_conf_path, 'r') as _f:
                 app.conformal_config = json.load(_f)
-            print("✅ Conformal prediction config loaded")
+            print(" Conformal prediction config loaded")
     except Exception as _e:
-        print(f"⚠️ Could not load conformal config: {_e}")
+        print(f" Could not load conformal config: {_e}")
 
     load_ml_on_startup = os.environ.get("LOAD_ML_ON_STARTUP", "").strip().lower()
     if config_name == 'production' and load_ml_on_startup not in {"1", "true", "yes"}:
-        print("ℹ️ Skipping ML model preload in production startup (set LOAD_ML_ON_STARTUP=1 to enable).")
+        print("ℹ Skipping ML model preload in production startup (set LOAD_ML_ON_STARTUP=1 to enable).")
     else:
         try:
             import joblib
@@ -598,13 +598,13 @@ def create_app(config_name='production'):
             _xgb_path = os.path.join(model_dir, "xgb_model.json")
             if os.path.exists(_cal_path):
                 app.xgb_model = joblib.load(_cal_path)
-                print("✅ Calibrated XGBoost model loaded successfully")
+                print(" Calibrated XGBoost model loaded successfully")
             elif os.path.exists(_xgb_path):
                 import xgboost as xgb
                 xgb_model = xgb.XGBClassifier()
                 xgb_model.load_model(_xgb_path)
                 app.xgb_model = xgb_model
-                print("✅ XGBoost model loaded successfully")
+                print(" XGBoost model loaded successfully")
 
             # Load encoders
             encoders = {}
@@ -625,15 +625,13 @@ def create_app(config_name='production'):
                 encoders['recycle_encoder'] = encoders['recyclability_encoder']
 
             app.encoders = encoders
-            print(f"✅ Loaded {len(encoders)} encoders successfully")
+            print(f" Loaded {len(encoders)} encoders successfully")
 
         except Exception as e:
-            print(f"⚠️ Error loading ML models: {e}")
+            print(f" Error loading ML models: {e}")
             app.xgb_model = None
             app.encoders = {}
-    
-    # === ROUTES ===
-    
+
     @app.route('/health', methods=['GET'])
     def health_check():
         """Health check endpoint"""
@@ -657,12 +655,12 @@ def create_app(config_name='production'):
             'service': 'impacttracker-api',
             'mode': config_name
         }), 200
-    
+
     @app.route('/estimate_emissions', methods=['POST'])
     @limiter.limit("10 per minute")
     def estimate_emissions():
         """Main endpoint for estimating product emissions - matches localhost functionality"""
-        print("🔔 Route hit: /estimate_emissions")
+        print(" Route hit: /estimate_emissions")
 
         import pandas as pd
         import pgeocode
@@ -686,14 +684,14 @@ def create_app(config_name='production'):
         data = request.get_json()
         if not data:
             return jsonify({"error": "Missing JSON in request"}), 400
-            
+
         try:
             raw_url = data.get("amazon_url")
             url = normalize_amazon_url(raw_url)
             postcode = data.get("postcode")
             include_packaging = data.get("include_packaging", True)
             override_mode = data.get("override_transport_mode")
-            
+
             # Validate inputs
             if not url or not postcode:
                 return jsonify({"error": "Missing URL or postcode"}), 400
@@ -909,9 +907,9 @@ def create_app(config_name='production'):
                     },
                 }
                 return jsonify(cached_response)
-            
+
             # Scrape product - using unified scraper in production
-            print(f"🔍 Scraping URL: {url}")
+            print(f" Scraping URL: {url}")
             import concurrent.futures as _cf
             try:
                 with _cf.ThreadPoolExecutor(max_workers=1) as _pool:
@@ -919,15 +917,15 @@ def create_app(config_name='production'):
                     product = _future.result(timeout=30)
             except _cf.TimeoutError:
                 return jsonify({"error": "Scraping timed out — Amazon may be slow or blocking. Please try again."}), 504
-            
+
             _BAD_SCRAPE_TITLES = {'unknown product', 'amazon product', 'unknown', '', 'consumer product'}
             _scraped_title = (product.get('title') or '').strip().lower()
             if not product or _scraped_title in _BAD_SCRAPE_TITLES:
                 return jsonify({"error": "Failed to scrape product data"}), 400
             if _scraped_title == 'blocked':
                 return jsonify({"error": "Amazon is blocking requests from this server. The SCRAPERAPI_KEY environment variable may be missing or expired."}), 503
-                
-            print(f"✅ Scraper success: {product.get('title', '')[:50]}...")
+
+            print(f" Scraper success: {product.get('title', '')[:50]}...")
 
             # Material detection priority:
             # 1. Title-based guess (smart_guess_material on title) — most reliable for naming
@@ -942,22 +940,22 @@ def create_app(config_name='production'):
 
             if title_material:
                 material = title_material
-                print(f"🧠 Title-based material: {material}")
+                print(f" Title-based material: {material}")
             elif spec_table_material:
                 material = spec_table_material
-                print(f"🧵 Spec-table-based material: {material} (raw: '{scraped_material}')")
+                print(f" Spec-table-based material: {material} (raw: '{scraped_material}')")
             elif scraped_material and scraped_material.lower() not in ["unknown", "other", "", "not found", "n/a", "mixed"]:
                 material = scraped_material
-                print(f"📋 Scraped material (raw): {material}")
+                print(f" Scraped material (raw): {material}")
             else:
                 material = "Mixed"
-                print("⚠️ No material detected — defaulting to Mixed")
+                print(" No material detected — defaulting to Mixed")
 
             product["material_type"] = material
 
             normalized_material = apply_material_title_consistency(product)
             if normalized_material and str(normalized_material).strip().lower() != str(material or '').strip().lower():
-                print(f"🧬 Consistency override material: {material} -> {normalized_material}")
+                print(f" Consistency override material: {material} -> {normalized_material}")
                 material = normalized_material
             else:
                 material = product.get("material_type") or material
@@ -976,7 +974,7 @@ def create_app(config_name='production'):
                     amazon_extracted_materials=product.get('amazon_materials_extracted'),
                 )
             except Exception as _mat_err:
-                print(f"⚠️ Materials detection failed: {_mat_err}")
+                print(f" Materials detection failed: {_mat_err}")
                 materials_result = None
 
             # CO₂ uncertainty — ±% based on material detection confidence tier.
@@ -992,7 +990,7 @@ def create_app(config_name='production'):
                 if _detected and _detected.lower() not in ('unknown', 'mixed', ''):
                     material = _detected
                     product['material_type'] = material
-                    print(f"🧱 CO₂ material synced from spec table: {material}")
+                    print(f" CO₂ material synced from spec table: {material}")
 
             # Get weight
             raw_weight = product.get("weight_kg") or product.get("raw_product_weight_kg")
@@ -1013,19 +1011,19 @@ def create_app(config_name='production'):
             _is_legitimately_heavy = any(hc in _cat_lower for hc in _HEAVY_CATEGORIES)
             if weight > 150 and not _is_legitimately_heavy:
                 weight /= 1000
-                print(f"⚠️ Weight auto-corrected from grams: {weight} kg")
-            print(f"🏋️ Using weight: {weight} kg from scraper")
+                print(f" Weight auto-corrected from grams: {weight} kg")
+            print(f" Using weight: {weight} kg from scraper")
             if include_packaging:
                 weight *= 1.05
-            
+
             # Get user coordinates from postcode
             geo = pgeocode.Nominatim("gb")
             location = geo.query_postal_code(postcode)
             if location.empty or pd.isna(location.latitude):
                 return jsonify({"error": "Invalid postcode"}), 400
-                
+
             user_lat, user_lon = location.latitude, location.longitude
-            
+
             # Get origin coordinates
             def _is_unknown_value(value) -> bool:
                 return str(value or "").strip().lower() in {"unknown", "", "none", "n/a", "na"}
@@ -1056,7 +1054,7 @@ def create_app(config_name='production'):
                 elif final_origin_confidence in {None, "", "unknown"}:
                     final_origin_confidence = "medium"
             elif not _is_unknown_value(scraped_origin) and scraped_source in weak_sources:
-                print(f"⚠️ Ignoring weak scraped origin '{scraped_origin}' from source '{scraped_source}' and continuing fallbacks")
+                print(f" Ignoring weak scraped origin '{scraped_origin}' from source '{scraped_source}' and continuing fallbacks")
 
             if _is_unknown_value(origin_country):
                 brand = product.get("brand", "")
@@ -1072,7 +1070,7 @@ def create_app(config_name='production'):
                             product["origin"] = origin_country
                             product["country_of_origin"] = origin_country
                     except Exception as origin_error:
-                        print(f"⚠️ Brand-origin fallback error: {origin_error}")
+                        print(f" Brand-origin fallback error: {origin_error}")
 
             if _is_unknown_value(origin_country):
                 asin = str(product.get("asin", "")).strip().upper()
@@ -1094,7 +1092,7 @@ def create_app(config_name='production'):
                                 product["origin"] = origin_country
                                 product["country_of_origin"] = origin_country
                     except Exception as asin_error:
-                        print(f"⚠️ ASIN-history fallback error: {asin_error}")
+                        print(f" ASIN-history fallback error: {asin_error}")
 
             if _is_unknown_value(origin_country):
                 title_for_heuristic = str(product.get("title", "") or "").strip()
@@ -1110,7 +1108,7 @@ def create_app(config_name='production'):
                     final_origin_source = "unknown"
                     if final_origin_confidence in {None, "", "unknown"}:
                         final_origin_confidence = "unknown"
-            
+
             # For UK internal deliveries, determine specific region from postcode
             # Only remap when origin comes from explicit product-page evidence.
             explicit_sources = {"technical_details", "product_details", "manufacturer_contact", "specifications", "scraped_verified", "raw_text"}
@@ -1125,18 +1123,18 @@ def create_app(config_name='production'):
                 else:
                     origin_country = "England"
                 print(f"🇬🇧 UK internal delivery - Origin: {origin_country}")
-            
-            print(f"🌍 Origin determined: {origin_country}")
+
+            print(f" Origin determined: {origin_country}")
             # Fall back to China hub (not UK) for unknown overseas origins to avoid near-zero distance
             default_hub = uk_hub if origin_country in ("UK", "England", "Scotland", "Wales", "Northern Ireland") else origin_hubs.get("China")
             origin_coords = origin_hubs.get(origin_country, default_hub)
-            
+
             # Distance calculations
             origin_distance_km = round(haversine(origin_coords["lat"], origin_coords["lon"], user_lat, user_lon), 1)
             uk_distance_km = round(haversine(uk_hub["lat"], uk_hub["lon"], user_lat, user_lon), 1)
-            
-            print(f"🌍 Distances → origin: {origin_distance_km} km | UK hub: {uk_distance_km} km")
-            
+
+            print(f" Distances → origin: {origin_distance_km} km | UK hub: {uk_distance_km} km")
+
             # Transport mode logic
             def determine_transport_mode(distance_km, origin_country="Unknown"):
                 water_crossing_countries = ["Ireland", "France", "Germany", "Netherlands", "Belgium", "Denmark",
@@ -1162,10 +1160,10 @@ def create_app(config_name='production'):
             if override_mode:
                 mode_name   = override_mode
                 mode_factor = TRANSPORT_CO2_FACTOR.get(override_mode, mode_factor)
-            
-            print(f"🚚 Transport: {mode_name} (factor: {mode_factor})")
-            
-            # === Rule-based CO2 calculation ===
+
+            print(f" Transport: {mode_name} (factor: {mode_factor})")
+
+            # Rule-based CO2 calculation
             import numpy as np
             transport_co2 = weight * mode_factor * origin_distance_km / 1000
             material_intensity = MATERIAL_CO2_INTENSITY.get(material, 2.0)
@@ -1189,7 +1187,7 @@ def create_app(config_name='production'):
             else:
                 eco_score_rule_based = "F"
 
-            # === ML prediction using XGBoost (lazy-load on first request) ===
+            # ML prediction (lazy-load on first request)
             import joblib
 
             if not (hasattr(app, 'xgb_model') and app.xgb_model):
@@ -1199,17 +1197,17 @@ def create_app(config_name='production'):
                             _cal_path = os.path.join(model_dir, "calibrated_model.pkl")
                             if os.path.exists(_cal_path):
                                 app.xgb_model = joblib.load(_cal_path)
-                                print("✅ Lazy-loaded calibrated_model.pkl")
+                                print(" Lazy-loaded calibrated_model.pkl")
                             else:
                                 app.xgb_model = joblib.load(os.path.join(model_dir, "eco_model.pkl"))
-                                print("✅ Lazy-loaded eco_model.pkl")
+                                print(" Lazy-loaded eco_model.pkl")
                         except Exception:
                             try:
                                 import xgboost as xgb_mod
                                 _m = xgb_mod.XGBClassifier()
                                 _m.load_model(os.path.join(model_dir, "xgb_model.json"))
                                 app.xgb_model = _m
-                                print("✅ Lazy-loaded xgb_model.json")
+                                print(" Lazy-loaded xgb_model.json")
                             except Exception:
                                 app.xgb_model = None
 
@@ -1301,7 +1299,7 @@ def create_app(config_name='production'):
                                         _ps = [eco_score_ml] + _ps
                                     conformal_sets[_cov_label] = _ps
                         except Exception as _ce:
-                            print(f"⚠️ Conformal prediction failed: {_ce}")
+                            print(f" Conformal prediction failed: {_ce}")
 
                     # Origin is one of the primary model features.  When the
                     # origin was inferred from a weak heuristic (brand default,
@@ -1315,7 +1313,7 @@ def create_app(config_name='production'):
                     elif final_origin_confidence in ("unknown", None, ""):
                         confidence = max(5.0, round(confidence * 0.90, 1))
 
-                    print(f"✅ ML prediction: {eco_score_ml} ({confidence}%)")
+                    print(f" ML prediction: {eco_score_ml} ({confidence}%)")
 
                     # SHAP per-prediction explanation
                     try:
@@ -1357,20 +1355,20 @@ def create_app(config_name='production'):
                             "base_value": round(base_val, 4),
                             "features": shap_features
                         }
-                        print(f"✅ SHAP explanation computed")
+                        print(f" SHAP explanation computed")
                     except Exception as shap_err:
-                        print(f"⚠️ SHAP failed: {shap_err}")
+                        print(f" SHAP failed: {shap_err}")
                 except Exception as ml_err:
-                    print(f"⚠️ ML prediction failed: {ml_err}")
+                    print(f" ML prediction failed: {ml_err}")
                     eco_score_ml = eco_score_rule_based
                     confidence = 0.0
             else:
-                print("⚠️ No ML model available — using rule-based grade")
+                print(" No ML model available — using rule-based grade")
 
             # ml_co2 used in DB save — set to rule_co2 as best approximation
             ml_co2 = rule_co2
 
-            # === Counterfactual Explanations ===
+            # Counterfactual explanations
             # For each scenario, re-encode modified features and re-predict to show
             # what single change would most improve the eco grade.
             # Method: Wachter et al. (2017) "Counterfactual Explanations without Opening the Black Box"
@@ -1437,9 +1435,9 @@ def create_app(config_name='production'):
                     counterfactuals.sort(key=lambda x: x['grades_improved'], reverse=True)
                     counterfactuals = counterfactuals[:3]
                     if counterfactuals:
-                        print(f"✅ Counterfactuals computed: {len(counterfactuals)}")
+                        print(f" Counterfactuals computed: {len(counterfactuals)}")
                 except Exception as cf_err:
-                    print(f"⚠️ Counterfactual generation error: {cf_err}")
+                    print(f" Counterfactual generation error: {cf_err}")
 
             recyclability_pct = get_recyclability_pct(material)
             recyclability_label = 'High' if recyclability_pct >= 70 else ('Medium' if recyclability_pct >= 40 else 'Low')
@@ -1599,7 +1597,7 @@ def create_app(config_name='production'):
                     ]
                 }
             }
-            
+
             # Save to database
             try:
                 confidence_label = str(final_origin_confidence or 'medium').strip().lower()
@@ -1634,7 +1632,7 @@ def create_app(config_name='production'):
                     'scraping_status': 'success',
                     'materials_json': _materials_json,
                 }, user_id=_session_user_id)
-                
+
                 save_emission_calculation({
                     'scraped_product_id': scraped_product.id,
                     'user_postcode': postcode,
@@ -1676,7 +1674,7 @@ def create_app(config_name='production'):
                 )
                 db.session.add(new_product)
                 db.session.commit()
-                print(f"✅ Product added to DB: {new_product.title} (total now {Product.query.count()})")
+                print(f" Product added to DB: {new_product.title} (total now {Product.query.count()})")
 
                 # ── Data flywheel: append to live_scraped.csv for future retraining ──
                 # The retrain.py script will merge this with the 50k base dataset.
@@ -1712,15 +1710,15 @@ def create_app(config_name='production'):
 
             except Exception as e:
                 print(f"Database save error: {e}")
-            
+
             return jsonify(response_data)
-            
+
         except Exception as e:
-            print(f"❌ Error in estimate_emissions: {e}")
+            print(f" Error in estimate_emissions: {e}")
             import traceback
             traceback.print_exc()
             return jsonify({"error": str(e)}), 500
-    
+
     @app.route('/api/material-avg', methods=['GET'])
     def material_avg_co2():
         """Return average CO2 for products with the same material type."""
@@ -1754,7 +1752,6 @@ def create_app(config_name='production'):
             import numpy as np
             import joblib
 
-            # === Lazy load model if not already loaded ===
             # Priority: calibrated_model.pkl > xgb_model.json > eco_model.pkl (RF fallback)
             # This matches the startup loading order so both endpoints use the same model.
             if not (hasattr(app, 'xgb_model') and app.xgb_model):
@@ -1766,7 +1763,7 @@ def create_app(config_name='production'):
                     if os.path.exists(_path):
                         try:
                             app.xgb_model = joblib.load(_path)
-                            print(f"✅ Lazy-loaded {_label} for /predict")
+                            print(f" Lazy-loaded {_label} for /predict")
                             _loaded = True
                             break
                         except Exception:
@@ -1777,11 +1774,10 @@ def create_app(config_name='production'):
                         _m = xgb.XGBClassifier()
                         _m.load_model(os.path.join(model_dir, "xgb_model.json"))
                         app.xgb_model = _m
-                        print("✅ Lazy-loaded xgb_model.json for /predict")
+                        print(" Lazy-loaded xgb_model.json for /predict")
                     except Exception as e:
                         return jsonify({'error': f'Failed to load ML model: {str(e)}'}), 500
 
-            # === Lazy load label encoder ===
             if not hasattr(app, 'label_encoder') or app.label_encoder is None:
                 try:
                     app.label_encoder = joblib.load(os.path.join(encoders_dir, 'label_encoder.pkl'))
@@ -1792,7 +1788,6 @@ def create_app(config_name='production'):
                             return [self.classes_[min(int(i), len(self.classes_) - 1)] for i in indices]
                     app.label_encoder = _FallbackLabelEncoder()
 
-            # === Lazy load feature encoders ===
             if not app.encoders:
                 encoders = {}
                 for enc_name, filename in [
@@ -1809,7 +1804,6 @@ def create_app(config_name='production'):
 
             data = request.get_json()
 
-            # === Helper functions ===
             def normalize(val, default):
                 return str(val).strip() if val else default
 
@@ -1826,7 +1820,6 @@ def create_app(config_name='production'):
                     except Exception:
                         return 0
 
-            # === Extract and encode features ===
             material = normalize(data.get('material'), 'Other')
             weight = float(data.get('weight') or 1.0)
             recyclability = normalize(data.get('recyclability'), 'Medium')
@@ -1855,7 +1848,6 @@ def create_app(config_name='production'):
 
             X = [[material_encoded, transport_encoded, recycle_encoded, origin_encoded, weight_log, weight_bin, material_transport, origin_recycle]]
 
-            # === Predict ===
             prediction = app.xgb_model.predict(X)
             decoded_score = app.label_encoder.inverse_transform([prediction[0]])[0]
 
@@ -1873,7 +1865,7 @@ def create_app(config_name='production'):
                 except Exception:
                     pass
 
-            print(f"🧠 Predicted: {decoded_score} ({confidence}%)")
+            print(f" Predicted: {decoded_score} ({confidence}%)")
 
             return jsonify({
                 'predicted_label': decoded_score,
@@ -1896,9 +1888,9 @@ def create_app(config_name='production'):
             })
 
         except Exception as e:
-            print(f"❌ Error in /predict: {e}")
+            print(f" Error in /predict: {e}")
             return jsonify({'error': str(e)}), 500
-    
+
     @app.route('/admin/products', methods=['GET'])
     def admin_get_products():
         """Admin endpoint to get all scraped products - REQUIRES ADMIN AUTH"""
@@ -1906,15 +1898,15 @@ def create_app(config_name='production'):
         user = session.get('user')
         if not user or user.get('role') != 'admin':
             return jsonify({'error': 'Admin access required'}), 403
-            
+
         try:
             page = request.args.get('page', 1, type=int)
             per_page = request.args.get('per_page', 20, type=int)
-            
+
             products = ScrapedProduct.query.paginate(
                 page=page, per_page=per_page, error_out=False
             )
-            
+
             return jsonify({
                 'success': True,
                 'products': [product.to_dict() for product in products.items],
@@ -1922,10 +1914,10 @@ def create_app(config_name='production'):
                 'pages': products.pages,
                 'current_page': page
             })
-            
+
         except Exception as e:
             return jsonify({'error': str(e)}), 500
-    
+
     @app.route('/admin/analytics', methods=['GET'])
     def admin_analytics():
         """Admin analytics dashboard - REQUIRES ADMIN AUTH"""
@@ -1933,33 +1925,33 @@ def create_app(config_name='production'):
         user = session.get('user')
         if not user or user.get('role') != 'admin':
             return jsonify({'error': 'Admin access required'}), 403
-            
+
         try:
             # Get basic stats
             total_products = ScrapedProduct.query.count()
             total_calculations = EmissionCalculation.query.count()
-            
+
             # Get material distribution
             material_stats = db.session.query(
                 ScrapedProduct.material,
                 db.func.count(ScrapedProduct.id).label('count')
             ).group_by(ScrapedProduct.material).all()
-            
+
             return jsonify({
                 'success': True,
                 'stats': {
                     'total_products': total_products,
                     'total_calculations': total_calculations,
                     'material_distribution': [
-                        {'material': material, 'count': count} 
+                        {'material': material, 'count': count}
                         for material, count in material_stats
                     ]
                 }
             })
-            
+
         except Exception as e:
             return jsonify({'error': str(e)}), 500
-    
+
     @app.route('/api/dashboard-metrics', methods=['GET'])
     def dashboard_metrics():
         """Dashboard metrics — counts from PostgreSQL products table (seeded from CSV)."""
@@ -2023,7 +2015,7 @@ def create_app(config_name='production'):
         except Exception as e:
             print(f"Error in dashboard-metrics: {e}")
             return jsonify({'error': str(e)}), 500
-    
+
     @app.route('/insights', methods=['GET'])
     def insights():
         """Analytics insights for dashboard"""
@@ -2033,16 +2025,16 @@ def create_app(config_name='production'):
                 Product.material,
                 db.func.count(Product.id).label('count')
             ).group_by(Product.material).limit(10).all()
-            
+
             # Get recent calculations
             recent_calculations = EmissionCalculation.query.order_by(
                 EmissionCalculation.id.desc()
             ).limit(10).all()
-            
+
             return jsonify({
                 'success': True,
                 'material_distribution': [
-                    {'material': material or 'Unknown', 'count': count} 
+                    {'material': material or 'Unknown', 'count': count}
                     for material, count in material_stats
                 ],
                 'recent_calculations': [
@@ -2055,7 +2047,7 @@ def create_app(config_name='production'):
             })
         except Exception as e:
             return jsonify({'error': str(e)}), 500
-    
+
     @app.route('/api/eco-data', methods=['GET'])
     def eco_data():
         """Eco data for tables and analytics - queries PostgreSQL Product table"""
@@ -2303,7 +2295,7 @@ def create_app(config_name='production'):
                 # "round", "rolling", or "massage" causes unrelated products to be
                 # returned when no exact match exists.
                 specific_kws = inferred
-                print(f"🔍 Product type inferred: {inferred} (category={category!r})")
+                print(f" Product type inferred: {inferred} (category={category!r})")
 
             # Map Amazon's verbose category breadcrumb to one of the 6 DB categories.
             # The DB training dataset uses these exact strings: health_beauty, books_media,
@@ -2438,7 +2430,7 @@ def create_app(config_name='production'):
                 if len(results) >= 3:
                     break
 
-            print(f"✅ Alternatives: {len(results)} results | keywords={keywords} grade={current_grade}")
+            print(f" Alternatives: {len(results)} results | keywords={keywords} grade={current_grade}")
             return jsonify({'alternatives': results})
 
         except Exception as e:
@@ -2452,7 +2444,7 @@ def create_app(config_name='production'):
         user = session.get('user')
         if not user or user.get('role') != 'admin':
             return jsonify({'error': 'Admin access required'}), 403
-            
+
         try:
             deps = _load_estimation_dependencies()
             _co2_to_grade = deps['co2_to_grade']
@@ -2700,7 +2692,7 @@ def create_app(config_name='production'):
         user = session.get('user')
         if not user or user.get('role') != 'admin':
             return jsonify({'error': 'Admin access required'}), 403
-            
+
         try:
             data = request.json
             submission_id = data.get('id')
@@ -2731,7 +2723,7 @@ def create_app(config_name='production'):
             return jsonify({'success': True, 'message': 'Submission updated'})
         except Exception as e:
             return jsonify({'error': str(e)}), 500
-    
+
     @app.route('/api/admin/backfill-materials', methods=['POST'])
     def admin_backfill_materials():
         """
@@ -3011,9 +3003,9 @@ def create_app(config_name='production'):
                 },
             })
         except Exception as e:
-            print(f"⚠️ Error loading model metrics: {e}")
+            print(f" Error loading model metrics: {e}")
             return jsonify({'error': str(e)}), 500
-    
+
     @app.route('/model-metrics', methods=['GET'])
     def model_metrics():
         """Get current model performance metrics"""
@@ -3033,14 +3025,14 @@ def create_app(config_name='production'):
             'total_predictions': EmissionCalculation.query.count(),
             'confidence_avg': confidence_avg,
         })
-    
+
     @app.route('/api/ml-audit', methods=['GET'])
     def ml_audit():
         """ML audit trail endpoint"""
         recent_predictions = EmissionCalculation.query.order_by(
             EmissionCalculation.id.desc()
         ).limit(20).all()
-        
+
         return jsonify({
             'audit_trail': [{
                 'id': pred.id,
@@ -3049,7 +3041,7 @@ def create_app(config_name='production'):
                 'method': pred.calculation_method
             } for pred in recent_predictions]
         })
-    
+
     @app.route('/api/feature-importance', methods=['GET'])
     def feature_importance():
         """Get feature importance from trained Random Forest model (eco_model.pkl)"""
@@ -3078,7 +3070,7 @@ def create_app(config_name='production'):
             {'feature': 'Recyclability',   'importance':  5.07},
             {'feature': 'Weight Category', 'importance':  4.57},
         ])
-    
+
     @app.route('/api/global-shap', methods=['GET'])
     def global_shap():
         """Global SHAP feature importance averaged over a dataset sample.
@@ -3151,13 +3143,13 @@ def create_app(config_name='production'):
                 except Exception as row_err:
                     row_errors += 1
                     if row_errors <= 3:
-                        print(f"⚠️ SHAP row encode error: {row_err}")
+                        print(f" SHAP row encode error: {row_err}")
 
-            print(f"ℹ️ Global SHAP: {len(rows)}/{len(sample)} rows encoded ({row_errors} errors)")
+            print(f"ℹ Global SHAP: {len(rows)}/{len(sample)} rows encoded ({row_errors} errors)")
 
             # Fallback: if encoding produced nothing, use feature_importances_ from the model
             if len(rows) < 10:
-                print("⚠️ SHAP row encoding failed — falling back to feature_importances_")
+                print(" SHAP row encoding failed — falling back to feature_importances_")
                 try:
                     fi = model.feature_importances_
                 except Exception:
@@ -3200,7 +3192,7 @@ def create_app(config_name='production'):
                 for i in range(min(8, len(global_imp)))
             ], key=lambda x: -x['importance'])
 
-            print(f"✅ Global SHAP computed over {len(rows)} samples")
+            print(f" Global SHAP computed over {len(rows)} samples")
             return jsonify({
                 'features':    features,
                 'sample_size': len(rows),
@@ -3274,7 +3266,7 @@ def create_app(config_name='production'):
             return jsonify({'success': True, 'message': 'Thank you for your feedback!'})
         except Exception as e:
             return jsonify({'error': str(e)}), 500
-    
+
     # Authentication endpoints
     @app.route('/signup', methods=['POST'])
     @limiter.limit("5 per minute")
@@ -3348,7 +3340,7 @@ def create_app(config_name='production'):
         except Exception as e:
             print(f"Login error: {e}")
             return jsonify({'error': 'Login failed'}), 500
-    
+
     @app.route('/logout', methods=['POST'])
     def logout():
         """User logout endpoint"""
@@ -3527,9 +3519,9 @@ def create_app(config_name='production'):
     try:
         from backend.routes.enterprise_dashboard import enterprise_bp
         app.register_blueprint(enterprise_bp)
-        print("✅ Enterprise dashboard blueprint registered")
+        print(" Enterprise dashboard blueprint registered")
     except Exception as _e:
-        print(f"⚠️  Enterprise blueprint not loaded: {_e}")
+        print(f"  Enterprise blueprint not loaded: {_e}")
 
     # ── AI Visual Material Analysis ───────────────────────────────────────────
     # ── Category hints injected into the vision prompt ───────────────────────
@@ -3849,7 +3841,7 @@ RULES:
                     largest = max(components, key=lambda c: c['percentage'])
                     largest['percentage'] += diff
 
-            print(f"🔬 Image analysis: {len(components)} components detected for '{product_title[:40]}'")
+            print(f" Image analysis: {len(components)} components detected for '{product_title[:40]}'")
             return jsonify({
                 'components': components,
                 'confidence': result.get('confidence', 'medium'),
@@ -3858,13 +3850,13 @@ RULES:
             })
 
         except json.JSONDecodeError as e:
-            print(f"⚠️ Image analysis JSON parse error: {e}")
+            print(f" Image analysis JSON parse error: {e}")
             return jsonify({'error': 'Could not parse AI response as JSON'}), 500
         except Exception as e:
-            print(f"⚠️ Image analysis error: {e}")
+            print(f" Image analysis error: {e}")
             return jsonify({'error': str(e)}), 500
 
-    print("✅ app_production routes initialized")
+    print(" app_production routes initialized")
     return app
 
 def calculate_emissions_for_product(product_data, user_postcode, app):
@@ -3872,10 +3864,10 @@ def calculate_emissions_for_product(product_data, user_postcode, app):
     try:
         # Step 1: Get geographic distance
         origin_country = product_data.get('origin', 'CN')  # Default to China
-        
+
         # Calculate distance and transport mode
         distance, transport_mode = calculate_transport_distance(origin_country, user_postcode)
-        
+
         # Step 2: ML Prediction (if available)
         ml_prediction = None
         if hasattr(app, 'xgb_model') and app.xgb_model:
@@ -3883,16 +3875,16 @@ def calculate_emissions_for_product(product_data, user_postcode, app):
                 features = prepare_ml_features(product_data, app.encoders)
                 ml_prediction = float(app.xgb_model.predict([features])[0])
             except Exception as e:
-                print(f"⚠️ ML prediction failed: {e}")
-        
+                print(f" ML prediction failed: {e}")
+
         # Step 3: Rule-based calculation
         rule_based_prediction = calculate_rule_based_emission(
             product_data, distance, transport_mode
         )
-        
+
         # Step 4: Final emission (prefer ML, fallback to rule-based)
         final_emission = ml_prediction if ml_prediction is not None else rule_based_prediction
-        
+
         return {
             'final_emission': final_emission,
             'ml_prediction': ml_prediction,
@@ -3902,9 +3894,9 @@ def calculate_emissions_for_product(product_data, user_postcode, app):
             'confidence': 0.85 if ml_prediction else 0.65,
             'method': 'ML + Rule-based' if ml_prediction else 'Rule-based only'
         }
-        
+
     except Exception as e:
-        print(f"❌ Error calculating emissions: {e}")
+        print(f" Error calculating emissions: {e}")
         return {
             'final_emission': 1.0,  # Default fallback
             'error': str(e),
@@ -3920,19 +3912,19 @@ def calculate_transport_distance(origin_country, user_postcode):
 
         # Get origin coordinates
         origin_coords = origin_hubs.get(origin_country, origin_hubs['CN'])
-        
+
         # Get user coordinates from postcode
         uk_geo = pgeocode.Nominatim('GB')
         user_location = uk_geo.query_postal_code(user_postcode)
-        
+
         if pd.isna(user_location.latitude):
             user_coords = uk_hub  # Default to London
         else:
             user_coords = (user_location.latitude, user_location.longitude)
-        
+
         # Calculate distance
         distance = haversine(origin_coords, user_coords)
-        
+
         # Determine transport mode
         if distance < 1500:
             transport_mode = "truck"
@@ -3940,11 +3932,11 @@ def calculate_transport_distance(origin_country, user_postcode):
             transport_mode = "ship"
         else:
             transport_mode = "air"
-        
+
         return distance, transport_mode
-        
+
     except Exception as e:
-        print(f"⚠️ Error calculating distance: {e}")
+        print(f" Error calculating distance: {e}")
         return 5000.0, "ship"  # Default values
 
 def prepare_ml_features(product_data, encoders):
@@ -3952,7 +3944,7 @@ def prepare_ml_features(product_data, encoders):
     try:
         import numpy as np
         features = []
-        
+
         # Material encoding
         material = product_data.get('material', 'Unknown')
         if 'material_encoder' in encoders:
@@ -3963,18 +3955,18 @@ def prepare_ml_features(product_data, encoders):
         else:
             material_encoded = 0
         features.append(material_encoded)
-        
+
         # Weight (normalized)
         weight = float(product_data.get('weight', 1.0))
         features.append(np.log1p(weight))  # Log transform
-        
+
         # Add other features as needed...
         # This is a simplified version - expand based on your actual model features
-        
+
         return features
-        
+
     except Exception as e:
-        print(f"⚠️ Error preparing ML features: {e}")
+        print(f" Error preparing ML features: {e}")
         return [0, 1.0]  # Default features
 
 def calculate_rule_based_emission(product_data, distance, transport_mode):
@@ -3990,35 +3982,35 @@ def calculate_rule_based_emission(product_data, distance, transport_mode):
             'fabric': 5.0,
             'electronics': 8.0
         }
-        
+
         # Transport factors (kg CO2/kg·km)
         transport_factors = {
             'truck': 0.00015,
             'ship': 0.00003,
             'air': 0.0005
         }
-        
+
         material = product_data.get('material', 'plastic').lower()
         weight = float(product_data.get('weight', 1.0))
-        
+
         material_intensity = material_intensities.get(material, 2.0)
         transport_factor = transport_factors.get(transport_mode, 0.0001)
-        
+
         # Total emission = material production + transport
         material_emission = weight * material_intensity
         transport_emission = weight * distance * transport_factor
-        
+
         total_emission = material_emission + transport_emission
-        
+
         return round(total_emission, 2)
-        
+
     except Exception as e:
-        print(f"⚠️ Error in rule-based calculation: {e}")
+        print(f" Error in rule-based calculation: {e}")
         return 1.0  # Default emission
 
 # Create the Flask app
 app = create_app(os.getenv('FLASK_ENV', 'production'))
-print("✅ app_production module initialized")
+print(" app_production module initialized")
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))

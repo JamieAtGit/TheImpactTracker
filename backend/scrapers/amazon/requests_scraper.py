@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
-"""
-🚀 RELIABLE REQUESTS-BASED SCRAPER
-==================================
+"""Requests-based scraper fallback when Selenium is blocked.
 
-When Selenium gets blocked, fall back to smart HTTP requests with:
-- Rotating user agents
-- Session management
-- Header spoofing
-- Request timing
+Uses rotating user agents, session management, header spoofing, and request timing.
 """
 
 import requests

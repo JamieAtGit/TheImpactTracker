@@ -78,7 +78,7 @@ class FixedWeightParser:
         """
         
         return {
-            # ========== SMARTPHONES ==========
+            # Smartphones
             'iphone_14_pro': {
                 'model': 'iPhone 14 Pro',
                 'weight_kg': 0.206,
@@ -120,7 +120,7 @@ class FixedWeightParser:
                 'source': 'Samsung Specifications'
             },
             
-            # ========== LAPTOPS ==========
+            # Laptops
             'macbook_air_13': {
                 'model': 'MacBook Air 13-inch',
                 'weight_kg': 1.24,
@@ -154,7 +154,7 @@ class FixedWeightParser:
                 'source': 'Lenovo Specifications'
             },
             
-            # ========== TABLETS ==========
+            # Tablets
             'ipad_pro_12_9': {
                 'model': 'iPad Pro 12.9-inch',
                 'weight_kg': 0.682,
@@ -180,7 +180,7 @@ class FixedWeightParser:
                 'source': 'Samsung Specifications'
             },
             
-            # ========== HEADPHONES ==========
+            # Headphones
             'airpods_pro': {
                 'model': 'AirPods Pro',
                 'weight_kg': 0.0056,  # Each earbud
@@ -198,7 +198,7 @@ class FixedWeightParser:
                 'source': 'Sony Specifications'
             },
             
-            # ========== KITCHEN APPLIANCES ==========
+            # Kitchen Appliances
             'kitchenaid_stand_mixer': {
                 'model': 'KitchenAid Artisan Stand Mixer',
                 'weight_kg': 11.12,
@@ -216,7 +216,7 @@ class FixedWeightParser:
                 'source': 'Ninja Specifications'
             },
             
-            # ========== BOOKS (EXAMPLES) ==========
+            # Books
             'paperback_book_average': {
                 'model': 'Average Paperback Book',
                 'weight_kg': 0.35,
@@ -234,7 +234,7 @@ class FixedWeightParser:
                 'source': 'Publishing Industry Average'
             },
             
-            # ========== CLOTHING (EXAMPLES) ==========
+            # Clothing
             't_shirt_cotton': {
                 'model': 'Cotton T-Shirt (Medium)',
                 'weight_kg': 0.15,

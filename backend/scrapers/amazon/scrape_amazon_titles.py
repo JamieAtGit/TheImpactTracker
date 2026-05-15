@@ -12,7 +12,7 @@ from datetime import datetime
 import difflib
 
 # Debug: print interpreter path
-print("🧠 Python running from:", sys.executable)
+print(" Python running from:", sys.executable)
 
 # Step 1: Point to your project root (DEV/DSP)
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
@@ -73,7 +73,7 @@ if webdriver is not None:
     ua = UserAgent()
     random_user_agent = ua.random
     chrome_options.add_argument(f"user-agent={random_user_agent}")
-    print(f"🧢 Using User-Agent: {random_user_agent}")
+    print(f" Using User-Agent: {random_user_agent}")
 
 material_co2_map = load_material_co2_data()
 
@@ -82,7 +82,7 @@ fallback_mode = False
 # === ChromeDriver instantiation should happen *inside* your scraping functions
 # For test or fallback mode only:
 fallback_mode = False
-print("⚠️ Fallback mode:", fallback_mode)
+print(" Fallback mode:", fallback_mode)
 
 # === CO2 Lookup Table
 material_co2_map = load_material_co2_data()
@@ -91,7 +91,7 @@ material_co2_map = load_material_co2_data()
 #driver = webdriver.Chrome(service=Service(CHROMEDRIVER_PATH), options=chrome_options)
 
 #driver = webdriver.Chrome(service=service, options=chrome_options)
-print("⚠️ Running fallback mode — scraper disabled on remote deployment.")
+print(" Running fallback mode — scraper disabled on remote deployment.")
 fallback_mode = False
 
 # Quick test
@@ -103,13 +103,13 @@ fallback_mode = False
 
 class Log:
     @staticmethod
-    def info(msg): print(f"\033[94mℹ️ {msg}\033[0m")
+    def info(msg): print(f"\033[94mℹ {msg}\033[0m")
     @staticmethod
-    def success(msg): print(f"\033[92m✅ {msg}\033[0m")
+    def success(msg): print(f"\033[92m {msg}\033[0m")
     @staticmethod
-    def warn(msg): print(f"\033[93m⚠️ {msg}\033[0m")
+    def warn(msg): print(f"\033[93m {msg}\033[0m")
     @staticmethod
-    def error(msg): print(f"\033[91m❌ {msg}\033[0m")
+    def error(msg): print(f"\033[91m {msg}\033[0m")
 
 def safe_get(driver, url, retries=3, wait=10):
     for i in range(retries):
@@ -120,12 +120,12 @@ def safe_get(driver, url, retries=3, wait=10):
             # Check for anti-bot blocks
             page_source = driver.page_source.lower()
             if any(block in page_source for block in ["robot check", "service unavailable", "we're sorry"]):
-                Log.warn(f"🚫 Blocked or 503 at {url}. Retrying ({i+1}/{retries})...")
+                Log.warn(f" Blocked or 503 at {url}. Retrying ({i+1}/{retries})...")
                 continue  # Try again
 
             return True
         except Exception as e:
-            Log.warn(f"❌ Failed to load {url} (attempt {i+1}): {e}")
+            Log.warn(f" Failed to load {url} (attempt {i+1}): {e}")
             time.sleep(wait * (i+1))
     return False
 
@@ -137,7 +137,7 @@ priority_products = {}
 try:
     with open("priority_products.json", "r", encoding="utf-8") as f:
         priority_products = json.load(f)
-    Log.success(f"✅ Loaded {len(priority_products)} high-accuracy products.")
+    Log.success(f" Loaded {len(priority_products)} high-accuracy products.")
 except FileNotFoundError:
     Log.warn("priority_products.json not found. Starting with empty product DB.")
 except Exception as e:
@@ -151,7 +151,7 @@ try:
     BRAND_LOCATIONS_PATH = os.path.join(PROJECT_ROOT, 'common', 'data', 'json', 'brand_locations.json')
     with open(BRAND_LOCATIONS_PATH, "r", encoding="utf-8") as f:
         brand_locations = json.load(f)
-    Log.success(f"📦 Loaded {len(brand_locations)} custom brand locations from common path.")
+    Log.success(f" Loaded {len(brand_locations)} custom brand locations from common path.")
 except Exception as e:
     Log.warn(f" Could not load canonical brand_locations.json: {e}")
 
@@ -166,10 +166,10 @@ if webdriver is not None:
     chrome_options.add_argument("window-size=1280,800")
     chrome_options.add_argument("--lang=en-GB")
 
-    # 🧢 Rotate user-agent for stealth
+    #  Rotate user-agent for stealth
     random_user_agent = ua.random
     chrome_options.add_argument(f"user-agent={random_user_agent}")
-    Log.info(f"🧢 Using User-Agent: {random_user_agent}")
+    Log.info(f" Using User-Agent: {random_user_agent}")
 
 
 
@@ -188,10 +188,10 @@ except FileNotFoundError:
     Log.warn("brand_origins.csv not found. Defaulting to heuristic mapping.")
 
 
-# 🌍 GLOBAL MANUFACTURING AND DISTRIBUTION HUBS
+#  GLOBAL MANUFACTURING AND DISTRIBUTION HUBS
 # Expanded with major manufacturing centers and regions for accurate distance calculations
 origin_hubs = {
-    # 🌏 Asia-Pacific
+    #  Asia-Pacific
     "China": {"lat": 31.2304, "lon": 121.4737, "city": "Shanghai", "region": "Asia"},
     "Japan": {"lat": 35.6895, "lon": 139.6917, "city": "Tokyo", "region": "Asia"},
     "South Korea": {"lat": 37.5665, "lon": 126.9780, "city": "Seoul", "region": "Asia"},
@@ -214,7 +214,7 @@ origin_hubs = {
     "Ethiopia": {"lat": 9.0249, "lon": 38.7468, "city": "Addis Ababa", "region": "Africa"},
     "Morocco": {"lat": 33.5731, "lon": -7.5898, "city": "Casablanca", "region": "Africa"},
     "Portugal": {"lat": 38.7223, "lon": -9.1393, "city": "Lisbon", "region": "Europe"},
-    
+
     # 🇪🇺 Europe
     "Germany": {"lat": 50.1109, "lon": 8.6821, "city": "Frankfurt", "region": "Europe"},
     "UK": {"lat": 51.509865, "lon": -0.118092, "city": "London", "region": "Europe"},
@@ -242,14 +242,14 @@ origin_hubs = {
     "Romania": {"lat": 44.4268, "lon": 26.1025, "city": "Bucharest", "region": "Europe"},
     "Greece": {"lat": 37.9755, "lon": 23.7348, "city": "Athens", "region": "Europe"},
     "Turkey": {"lat": 39.9334, "lon": 32.8597, "city": "Ankara", "region": "Europe"},
-    
-    # 🌍 Middle East
+
+    #  Middle East
     "UAE": {"lat": 25.2048, "lon": 55.2708, "city": "Dubai", "region": "Middle East"},
     "Saudi Arabia": {"lat": 24.6877, "lon": 46.7219, "city": "Riyadh", "region": "Middle East"},
     "Israel": {"lat": 32.0853, "lon": 34.7818, "city": "Tel Aviv", "region": "Middle East"},
     "Iran": {"lat": 35.6892, "lon": 51.3890, "city": "Tehran", "region": "Middle East"},
 
-    # 🌎 Americas
+    #  Americas
     "USA": {"lat": 39.0458, "lon": -76.6413, "city": "Baltimore", "region": "North America"},
     "Canada": {"lat": 43.6532, "lon": -79.3832, "city": "Toronto", "region": "North America"},
     "Mexico": {"lat": 19.4326, "lon": -99.1332, "city": "Mexico City", "region": "North America"},
@@ -262,7 +262,7 @@ origin_hubs = {
     "Argentina": {"lat": -34.6037, "lon": -58.3816, "city": "Buenos Aires", "region": "South America"},
     "Chile": {"lat": -33.4489, "lon": -70.6693, "city": "Santiago", "region": "South America"},
 
-    # 🌍 Africa
+    #  Africa
     "South Africa": {"lat": -26.2041, "lon": 28.0473, "city": "Johannesburg", "region": "Africa"},
     "Nigeria": {"lat": 6.5244, "lon": 3.3792, "city": "Lagos", "region": "Africa"},
     "Egypt": {"lat": 30.0444, "lon": 31.2357, "city": "Cairo", "region": "Africa"},
@@ -277,7 +277,7 @@ origin_hubs = {
     "Mauritius": {"lat": -20.1609, "lon": 57.4977, "city": "Port Louis", "region": "Africa"},
     "Madagascar": {"lat": -18.8792, "lon": 47.5079, "city": "Antananarivo", "region": "Africa"},
 
-    # 🌏 Central Asia
+    #  Central Asia
     "Uzbekistan": {"lat": 41.2995, "lon": 69.2401, "city": "Tashkent", "region": "Central Asia"},
     "Kazakhstan": {"lat": 51.1801, "lon": 71.4460, "city": "Astana", "region": "Central Asia"},
 }
@@ -318,7 +318,7 @@ known_brand_origins = {
     "nintendo": "Japan",
     "uno": {"country": "USA", "source": "brand_db"},
     "mattel": {"country": "USA", "source": "brand_db"},
-    
+
     # Toys & baby
     "steiff": "Germany",
     "lego": "Denmark",
@@ -606,7 +606,7 @@ def extract_origin_from_structured_data(driver):
             "#detailBullets_feature_div li",
             ".a-section table tr"
         ]
-        
+
         for selector in details_selectors:
             try:
                 rows = driver.find_elements(By.CSS_SELECTOR, selector)
@@ -627,7 +627,7 @@ def extract_origin_from_structured_data(driver):
                                 }
             except Exception as e:
                 continue
-        
+
         # Method 2: Technical Specifications section
         try:
             tech_specs = driver.find_elements(By.CSS_SELECTOR, "#technicalSpecifications_section_1 tr")
@@ -647,7 +647,7 @@ def extract_origin_from_structured_data(driver):
                             }
         except Exception as e:
             pass
-        
+
         # Method 3: Product feature bullets with explicit origin mention
         try:
             bullets = driver.find_elements(By.CSS_SELECTOR, "#feature-bullets li, .a-unordered-list li")
@@ -675,30 +675,30 @@ def extract_origin_from_structured_data(driver):
                                 }
         except Exception as e:
             pass
-            
+
         # No structured origin data found
         return {"found": False, "country": "Unknown", "method": "none", "raw_text": ""}
-        
+
     except Exception as e:
-        print(f"⚠️ Error in structured origin extraction: {e}")
+        print(f" Error in structured origin extraction: {e}")
         return {"found": False, "country": "Unknown", "method": "error", "raw_text": str(e)}
 
 def extract_weight_from_structured_data(driver):
     """
-    Extract weight from Amazon's structured data sections  
+    Extract weight from Amazon's structured data sections
     Returns: {"found": bool, "weight_kg": float, "method": str, "raw_text": str}
     """
     try:
         # Method 1: Product Dimensions with weight (highest priority)
         page_text = driver.page_source
-        
+
         # Enhanced patterns for dimensions + weight
         dimension_patterns = [
             r"product\s+dimensions[:\s]+[\d\s.x×*cm;,]+[;,]\s*([\d.]+)\s*g\b",
             r"package\s+dimensions[:\s]+[\d\s.x×*cm;,]+[;,]\s*([\d.]+)\s*g\b",
             r"[\d.]+\s*[x×]\s*[\d.]+\s*[x×]\s*[\d.]+\s*cm[;,\s]+([\d.]+)\s*g\b"
         ]
-        
+
         for pattern in dimension_patterns:
             match = re.search(pattern, page_text, re.IGNORECASE)
             if match:
@@ -710,13 +710,13 @@ def extract_weight_from_structured_data(driver):
                     "method": "product_dimensions",
                     "raw_text": match.group(0)
                 }
-        
+
         # Method 2: Dedicated weight fields in product details
         details_selectors = [
             "table.a-keyvalue tr",
             "#detailBullets_feature_div li"
         ]
-        
+
         for selector in details_selectors:
             try:
                 rows = driver.find_elements(By.CSS_SELECTOR, selector)
@@ -736,7 +736,7 @@ def extract_weight_from_structured_data(driver):
                                     weight_kg = weight_val
                                 else:  # grams
                                     weight_kg = weight_val / 1000
-                                
+
                                 return {
                                     "found": True,
                                     "weight_kg": weight_kg,
@@ -745,12 +745,12 @@ def extract_weight_from_structured_data(driver):
                                 }
             except Exception as e:
                 continue
-        
+
         # No structured weight data found
         return {"found": False, "weight_kg": 0, "method": "none", "raw_text": ""}
-        
+
     except Exception as e:
-        print(f"⚠️ Error in structured weight extraction: {e}")
+        print(f" Error in structured weight extraction: {e}")
         return {"found": False, "weight_kg": 0, "method": "error", "raw_text": str(e)}
 
 def extract_materials_from_structured_data(driver):
@@ -760,19 +760,19 @@ def extract_materials_from_structured_data(driver):
     """
     try:
         all_materials = []
-        
+
         details_selectors = [
             "table.a-keyvalue tr",
             "#detailBullets_feature_div li"
         ]
-        
+
         for selector in details_selectors:
             try:
                 rows = driver.find_elements(By.CSS_SELECTOR, selector)
                 for row in rows:
                     row_text = row.text.lower()
                     original_text = row.text.strip()
-                    
+
                     # Look for material field patterns
                     material_patterns = [
                         (r"material[:\s]*([a-zA-Z\s,]+)", "high"),
@@ -780,19 +780,19 @@ def extract_materials_from_structured_data(driver):
                         (r"(?:material|fabric)\s+(?:composition|type)[:\s]*([a-zA-Z\s,]+)", "medium"),
                         (r"made\s+(?:of|from)[:\s]*([a-zA-Z\s,]+)", "medium")
                     ]
-                    
+
                     # Debug: Log what we're checking
                     if "material" in row_text:
-                        print(f"🔍 DEBUG: Found 'material' in row: {original_text[:100]}...")
-                    
+                        print(f" DEBUG: Found 'material' in row: {original_text[:100]}...")
+
                     for pattern, confidence in material_patterns:
                         match = re.search(pattern, row_text, re.IGNORECASE)
                         if match:
                             raw_materials = match.group(1).strip()
-                            
+
                             # Parse multiple materials: "Aluminium, Plastic" -> ["Aluminium", "Plastic"]
                             materials_found = parse_multiple_materials(raw_materials)
-                            
+
                             for material_info in materials_found:
                                 if material_info["normalized"] != "Unknown":
                                     all_materials.append({
@@ -802,18 +802,18 @@ def extract_materials_from_structured_data(driver):
                                         "method": f"structured_{selector}",
                                         "raw_text": original_text
                                     })
-                            
+
                             if materials_found:  # Found materials in this row, don't check other patterns
                                 break
-                                
+
             except Exception as e:
                 continue
-        
+
         if all_materials:
             # Remove duplicates and prioritize by confidence and material importance
             unique_materials = deduplicate_and_prioritize_materials(all_materials)
             primary_material = determine_primary_material(unique_materials)
-            
+
             return {
                 "found": True,
                 "materials": unique_materials,
@@ -821,12 +821,12 @@ def extract_materials_from_structured_data(driver):
                 "method": "structured_multi_material",
                 "raw_text": "; ".join([m["raw_text"] for m in unique_materials[:3]])  # First 3 sources
             }
-        
+
         # No structured material data found
         return {"found": False, "materials": [], "primary_material": "Unknown", "method": "none", "raw_text": ""}
-        
+
     except Exception as e:
-        print(f"⚠️ Error in structured material extraction: {e}")
+        print(f" Error in structured material extraction: {e}")
         return {"found": False, "materials": [], "primary_material": "Unknown", "method": "error", "raw_text": str(e)}
 
 def parse_multiple_materials(raw_materials_text):
@@ -835,7 +835,7 @@ def parse_multiple_materials(raw_materials_text):
     Returns: [{"raw": str, "normalized": str, "weight": float, "confidence_score": float}, ...]
     """
     materials = []
-    
+
     # Enhanced percentage patterns
     percentage_patterns = [
         r"(\d+(?:\.\d+)?)%\s*([a-zA-Z\s\-]+)",  # "59.5% Rubber"
@@ -843,9 +843,9 @@ def parse_multiple_materials(raw_materials_text):
         r"([a-zA-Z\s\-]+)\s*(\d+(?:\.\d+)?)%",  # "Rubber 59%"
         r"([a-zA-Z\s\-]+)\s*:\s*(\d+(?:\.\d+)?)%",  # "Rubber: 59%"
     ]
-    
+
     percentage_found = False
-    
+
     # Try each percentage pattern
     for pattern in percentage_patterns:
         matches = re.findall(pattern, raw_materials_text, re.IGNORECASE)
@@ -856,7 +856,7 @@ def parse_multiple_materials(raw_materials_text):
                     percent_str, material_name = match
                 else:  # Material first
                     material_name, percent_str = match
-                
+
                 try:
                     weight = float(percent_str) / 100.0
                     normalized = normalize_material(material_name.strip())
@@ -870,14 +870,14 @@ def parse_multiple_materials(raw_materials_text):
                 except ValueError:
                     continue
             break
-    
+
     # If no percentages found, try fraction patterns
     if not percentage_found:
         fraction_patterns = [
             r"(\d+)/(\d+)\s*([a-zA-Z\s\-]+)",  # "2/3 Cotton"
             r"([a-zA-Z\s\-]+)\s*(\d+)/(\d+)",  # "Cotton 2/3"
         ]
-        
+
         for pattern in fraction_patterns:
             matches = re.findall(pattern, raw_materials_text, re.IGNORECASE)
             if matches:
@@ -888,7 +888,7 @@ def parse_multiple_materials(raw_materials_text):
                             numerator, denominator, material_name = match
                         else:  # Material first
                             material_name, numerator, denominator = match
-                        
+
                         weight = float(numerator) / float(denominator)
                         normalized = normalize_material(material_name.strip())
                         if normalized != "Unknown":
@@ -901,18 +901,18 @@ def parse_multiple_materials(raw_materials_text):
                     except (ValueError, ZeroDivisionError):
                         continue
                 break
-    
+
     # If still no specific weights found, handle comma-separated materials
     if not percentage_found:
         material_parts = [part.strip() for part in raw_materials_text.split(',')]
-        
+
         # Filter out empty parts and clean
         clean_parts = []
         for part in material_parts:
             cleaned = re.sub(r'[^\w\s-]', '', part).strip()
             if len(cleaned) > 1:  # Avoid single characters
                 clean_parts.append(cleaned)
-        
+
         if clean_parts:
             # If multiple materials, assume primary is 60%, others split remainder
             for i, material_part in enumerate(clean_parts):
@@ -927,29 +927,29 @@ def parse_multiple_materials(raw_materials_text):
                     else:  # Secondary materials split the rest
                         weight = 0.4 / (len(clean_parts) - 1)
                         confidence = 0.5
-                    
+
                     materials.append({
                         "raw": material_part,
                         "normalized": normalized,
                         "weight": weight,
                         "confidence_score": confidence
                     })
-    
+
     return materials
 
 def deduplicate_and_prioritize_materials(materials_list):
     """Remove duplicates and prioritize materials by importance and confidence"""
-    
+
     # Material priority ranking (higher number = more important for environmental impact)
     material_priority = {
         "Aluminum": 9, "Aluminium": 9, "Steel": 8, "Metal": 7,
         "Glass": 6, "Leather": 5, "Cotton": 4, "Rubber": 3,
         "Plastic": 2, "Synthetic": 1, "Unknown": 0
     }
-    
+
     # Confidence priority
     confidence_priority = {"high": 3, "medium": 2, "low": 1, "unknown": 0}
-    
+
     # Group by material name to remove duplicates
     material_groups = {}
     for material in materials_list:
@@ -960,24 +960,24 @@ def deduplicate_and_prioritize_materials(materials_list):
             # Keep the one with higher confidence
             if confidence_priority.get(material["confidence"], 0) > confidence_priority.get(material_groups[name]["confidence"], 0):
                 material_groups[name] = material
-    
+
     # Sort by priority (environmental impact) and confidence
     unique_materials = list(material_groups.values())
     unique_materials.sort(
         key=lambda m: (
             material_priority.get(m["name"], 0),
             confidence_priority.get(m["confidence"], 0)
-        ), 
+        ),
         reverse=True
     )
-    
+
     return unique_materials
 
 def determine_primary_material(materials_list):
     """Determine the primary material for environmental scoring"""
     if not materials_list:
         return "Unknown"
-    
+
     # Primary material is the highest priority material found
     return materials_list[0]["name"]
 
@@ -988,7 +988,7 @@ def calculate_compound_recyclability(materials_list):
     """
     if not materials_list:
         return "Unknown", 0, "No material information available"
-    
+
     # Individual material recyclability rates
     recyclability_map = {
         "Aluminum": 90, "Aluminium": 90, "Steel": 85, "Glass": 80,
@@ -996,23 +996,23 @@ def calculate_compound_recyclability(materials_list):
         "Plastic": 55, "Rubber": 20, "Leather": 10, "Synthetic": 30,
         "Metal": 80, "Unknown": 0
     }
-    
+
     # Calculate weighted average
     total_weight = sum(m["weight"] for m in materials_list)
     if total_weight == 0:
         total_weight = 1.0  # Avoid division by zero
-    
+
     weighted_recyclability = 0
     material_descriptions = []
-    
+
     for material in materials_list:
         material_recyclability = recyclability_map.get(material["name"], 0)
         weight_contribution = material["weight"] / total_weight
         weighted_recyclability += material_recyclability * weight_contribution
-        
+
         if material_recyclability > 0:
             material_descriptions.append(f"{material['name']} ({material_recyclability}%)")
-    
+
     # Determine overall level
     if weighted_recyclability >= 70:
         level = "High"
@@ -1022,7 +1022,7 @@ def calculate_compound_recyclability(materials_list):
         level = "Low"
     else:
         level = "Very Low"
-    
+
     # Create description
     if len(materials_list) == 1:
         description = f"Single material: {material_descriptions[0] if material_descriptions else 'Unknown material'}"
@@ -1030,30 +1030,30 @@ def calculate_compound_recyclability(materials_list):
         description = f"Compound material: {', '.join(material_descriptions[:3])}"  # Limit to 3 materials
         if len(material_descriptions) > 3:
             description += f" and {len(material_descriptions) - 3} more"
-    
+
     return level, int(weighted_recyclability), description
 
 def smart_context_aware_origin_detection(brand_name, product_title, product_attributes=None):
     """
-    🧠 ADVANCED SMART ORIGIN DETECTION - Multi-dimensional product analysis
-    
+     ADVANCED SMART ORIGIN DETECTION - Multi-dimensional product analysis
+
     Analyzes product quality indicators, naming patterns, materials, and features
     to predict manufacturing origin based on real-world brand strategies.
-    
+
     Example Analysis:
-    ✅ "Karrimor Metro 30 Rucksack, Polyester" → China (urban naming + standard material)
-    ✅ "Karrimor Alpine Pro Gore-Tex Jacket" → UK (premium naming + technical material)
-    
+     "Karrimor Metro 30 Rucksack, Polyester" → China (urban naming + standard material)
+     "Karrimor Alpine Pro Gore-Tex Jacket" → UK (premium naming + technical material)
+
     Args:
         brand_name: Brand name (e.g., "karrimor")
         product_title: Full product title for context analysis
         product_attributes: Dict of scraped product attributes (material, style, etc.)
-        
+
     Returns: {"country": str, "confidence": str, "reasoning": str}
     """
     brand_lower = brand_name.lower().strip()
     title_lower = product_title.lower()
-    
+
     # Extract attributes if provided
     attributes = product_attributes or {}
     material = attributes.get('material_type', '').lower() if attributes.get('material_type') else ''
@@ -1061,8 +1061,8 @@ def smart_context_aware_origin_detection(brand_name, product_title, product_attr
     features = attributes.get('features', '').lower() if attributes.get('features') else ''
     usage = attributes.get('usage', '').lower() if attributes.get('usage') else ''
     seasons = attributes.get('seasons', '').lower() if attributes.get('seasons') else ''
-    
-    # 🎯 BRAND-SPECIFIC MANUFACTURING INTELLIGENCE
+
+    #  BRAND-SPECIFIC MANUFACTURING INTELLIGENCE
     # Real-world manufacturing patterns for major multi-origin brands
     brand_manufacturing_patterns = {
         "karrimor": {
@@ -1084,7 +1084,7 @@ def smart_context_aware_origin_detection(brand_name, product_title, product_attr
             },
             "headquarters": "UK"
         },
-        
+
         "north face": {
             "usa_indicators": ["summit", "expedition", "gore-tex", "professional", "mountaineering", "alpine"],
             "usa_products": ["parka", "expedition", "summit"],
@@ -1092,7 +1092,7 @@ def smart_context_aware_origin_detection(brand_name, product_title, product_attr
             "vietnam_products": ["hoodie", "fleece", "t-shirt", "casual"],
             "headquarters": "USA"
         },
-        
+
         "patagonia": {
             "usa_indicators": ["technical", "climbing", "mountaineering", "expedition", "professional"],
             "usa_products": ["hardshell", "climbing", "mountaineering"],
@@ -1100,7 +1100,7 @@ def smart_context_aware_origin_detection(brand_name, product_title, product_attr
             "vietnam_products": ["t-shirt", "hoodie", "casual", "organic"],
             "headquarters": "USA"
         },
-        
+
         "columbia": {
             "usa_indicators": ["omni-tech", "omni-heat", "professional", "technical", "hunting", "fishing"],
             "usa_products": ["technical jacket", "hunting", "fishing"],
@@ -1108,7 +1108,7 @@ def smart_context_aware_origin_detection(brand_name, product_title, product_attr
             "vietnam_products": ["casual", "kids", "basic"],
             "headquarters": "USA"
         },
-        
+
         "timberland": {
             "usa_indicators": ["premium", "leather", "heritage", "waterproof", "professional", "work"],
             "usa_products": ["boots", "work boots", "premium"],
@@ -1116,7 +1116,7 @@ def smart_context_aware_origin_detection(brand_name, product_title, product_attr
             "china_products": ["sneakers", "casual shoes", "kids"],
             "headquarters": "USA"
         },
-        
+
         "new balance": {
             "usa_indicators": ["made in usa", "990", "991", "992", "993", "990v", "premium", "heritage"],
             "usa_products": ["990", "991", "992", "heritage"],
@@ -1125,61 +1125,61 @@ def smart_context_aware_origin_detection(brand_name, product_title, product_attr
             "headquarters": "USA"
         }
     }
-    
-    # 🧮 ADVANCED MULTI-DIMENSIONAL ANALYSIS
+
+    #  ADVANCED MULTI-DIMENSIONAL ANALYSIS
     if brand_lower in brand_manufacturing_patterns:
         patterns = brand_manufacturing_patterns[brand_lower]
-        
+
         # Calculate scores for each manufacturing location
         location_scores = {}
-        
+
         for location_key in patterns.keys():
             if location_key in ["headquarters"]:
                 continue
-                
+
             location_name = location_key.split("_")[0]  # Extract country name
             if location_name not in location_scores:
                 location_scores[location_name] = {"score": 0, "evidence": [], "location_key": location_key}
-            
+
             location_data = patterns[location_key]
             if isinstance(location_data, dict):
                 confidence_boost = location_data.get("confidence_boost", 0.5)
-                
-                # 🧪 MATERIAL ANALYSIS (High weight - materials don't lie!)
+
+                #  MATERIAL ANALYSIS (High weight - materials don't lie!)
                 material_matches = []
                 if material:
                     for mat in location_data.get("materials", []):
                         if mat in material:
                             material_matches.append(mat)
                             location_scores[location_name]["score"] += 0.4 * confidence_boost  # High weight for materials
-                
-                # 🏷️ NAMING PATTERN ANALYSIS (High weight - naming is strategic!)
+
+                #  NAMING PATTERN ANALYSIS (High weight - naming is strategic!)
                 naming_matches = []
                 all_text = f"{title_lower} {style} {features}"
                 for name_pattern in location_data.get("naming", []):
                     if name_pattern in all_text:
                         naming_matches.append(name_pattern)
                         location_scores[location_name]["score"] += 0.3 * confidence_boost  # High weight for naming
-                
-                # ⚙️ FEATURE ANALYSIS (Medium weight)
+
+                #  FEATURE ANALYSIS (Medium weight)
                 feature_matches = []
                 for feature in location_data.get("features", []):
                     if feature in all_text:
                         feature_matches.append(feature)
                         location_scores[location_name]["score"] += 0.2 * confidence_boost
-                
-                # 📦 PRODUCT TYPE ANALYSIS (Medium weight)
+
+                #  PRODUCT TYPE ANALYSIS (Medium weight)
                 product_matches = []
                 for product in location_data.get("products", []):
                     if product in all_text:
                         product_matches.append(product)
                         location_scores[location_name]["score"] += 0.2 * confidence_boost
-                
-                # 📅 SEASONAL/VINTAGE PENALTY (older products often cost-optimized)
+
+                #  SEASONAL/VINTAGE PENALTY (older products often cost-optimized)
                 if seasons and any(year in seasons for year in ["2016", "2017", "2018", "2019"]):
                     if location_name.lower() in ["china", "vietnam", "bangladesh"]:
                         location_scores[location_name]["score"] += 0.1  # Slight boost for older products = cost optimization
-                
+
                 # Build evidence list
                 evidence = []
                 if material_matches:
@@ -1190,29 +1190,29 @@ def smart_context_aware_origin_detection(brand_name, product_title, product_attr
                     evidence.append(f"features: {feature_matches}")
                 if product_matches:
                     evidence.append(f"products: {product_matches}")
-                
+
                 location_scores[location_name]["evidence"] = evidence
-        
-        # 🏆 DETERMINE WINNER
+
+        #  DETERMINE WINNER
         if location_scores:
             best_location = max(location_scores.keys(), key=lambda k: location_scores[k]["score"])
             best_score = location_scores[best_location]["score"]
             best_evidence = location_scores[best_location]["evidence"]
-            
+
             if best_score > 0.3:  # Significant evidence threshold
                 confidence = "high" if best_score > 0.6 else "medium" if best_score > 0.4 else "low"
-                
+
                 # Special case: Your Karrimor Metro 30 example
                 evidence_str = " + ".join(best_evidence) if best_evidence else "general indicators"
-                
+
                 return {
                     "country": best_location.title(),
                     "confidence": confidence,
-                    "reasoning": f"🎯 Multi-factor analysis: {brand_name} {evidence_str} → {best_location.title()} (score: {best_score:.2f})"
+                    "reasoning": f" Multi-factor analysis: {brand_name} {evidence_str} → {best_location.title()} (score: {best_score:.2f})"
                 }
-    
-    # 🌍 GENERIC INDUSTRY PATTERN ANALYSIS (for unknown brands)
-    
+
+    #  GENERIC INDUSTRY PATTERN ANALYSIS (for unknown brands)
+
     # Premium outdoor/technical gear → Heritage countries
     if any(word in title_lower for word in ["gore-tex", "waterproof", "breathable", "technical", "professional", "mountaineering", "expedition", "alpine"]):
         if any(word in title_lower for word in ["jacket", "shell", "boots", "gear"]):
@@ -1220,55 +1220,55 @@ def smart_context_aware_origin_detection(brand_name, product_title, product_attr
             return {
                 "country": "Germany",  # or UK, depending on brand linguistic patterns
                 "confidence": "medium",
-                "reasoning": f"🏔️ Premium technical outdoor gear typically manufactured in heritage countries (Germany/UK/USA)"
+                "reasoning": f" Premium technical outdoor gear typically manufactured in heritage countries (Germany/UK/USA)"
             }
-    
+
     # Casual/lifestyle products → Cost-optimized countries
     if any(word in title_lower for word in ["casual", "basic", "everyday", "kids", "children", "budget", "lightweight"]):
         return {
             "country": "Vietnam",  # Vietnam is common for mid-tier manufacturing
             "confidence": "medium",
-            "reasoning": f"👕 Casual/lifestyle products typically manufactured in cost-optimized locations (Vietnam/China)"
+            "reasoning": f" Casual/lifestyle products typically manufactured in cost-optimized locations (Vietnam/China)"
         }
-    
+
     # Electronics premium vs budget analysis
     if any(word in title_lower for word in ["smartphone", "laptop", "computer", "electronics"]):
         if any(word in title_lower for word in ["pro", "premium", "professional", "flagship"]):
             return {
                 "country": "South Korea",  # Samsung, LG heritage
                 "confidence": "medium",
-                "reasoning": f"📱 Premium electronics often manufactured in technology heritage countries"
+                "reasoning": f" Premium electronics often manufactured in technology heritage countries"
             }
         else:
             return {
                 "country": "China",
                 "confidence": "low",
-                "reasoning": f"📱 Standard electronics typically manufactured in China"
+                "reasoning": f" Standard electronics typically manufactured in China"
             }
-    
+
     # Kitchen/cookware premium analysis
     if any(word in title_lower for word in ["knife", "knives", "cookware", "kitchen", "cutlery"]):
         if any(word in title_lower for word in ["professional", "chef", "forged", "premium", "steel"]):
             return {
                 "country": "Germany",  # German knife/cookware heritage
-                "confidence": "medium", 
-                "reasoning": f"🔪 Premium cookware/cutlery often manufactured in Germany/Japan (craftsmanship heritage)"
+                "confidence": "medium",
+                "reasoning": f" Premium cookware/cutlery often manufactured in Germany/Japan (craftsmanship heritage)"
             }
-    
+
     return {
         "country": "Unknown",
         "confidence": "unknown",
-        "reasoning": f"❓ No context-specific manufacturing patterns detected for {brand_name}"
+        "reasoning": f" No context-specific manufacturing patterns detected for {brand_name}"
     }
 
 
 def auto_learn_context_specific_brand(brand_key, product_title, country, reasoning, confidence):
     """
-    🎓 CONTEXT-SPECIFIC LEARNING SYSTEM
-    
+     CONTEXT-SPECIFIC LEARNING SYSTEM
+
     Saves successful context-aware detections for future use.
     Unlike generic brand learning, this saves brand+product_type combinations.
-    
+
     Example saved data:
     - "karrimor_hiking_boots" → UK
     - "karrimor_casual_backpack" → China
@@ -1276,13 +1276,13 @@ def auto_learn_context_specific_brand(brand_key, product_title, country, reasoni
     - "nike_casual_lifestyle" → Vietnam
     """
     global brand_locations
-    
+
     if confidence in ["medium", "high"] and country not in ["Unknown"]:
-        
+
         # Create context-specific key
         product_context = extract_product_context(product_title)
         context_key = f"{brand_key}_{product_context}"
-        
+
         try:
             # Save to brand_locations with context
             brand_locations[context_key] = {
@@ -1298,51 +1298,51 @@ def auto_learn_context_specific_brand(brand_key, product_title, country, reasoni
                 "confidence": confidence,
                 "learned_at": datetime.now().isoformat()
             }
-            
+
             save_brand_locations()
-            print(f"🎓 CONTEXT-LEARNED: {context_key} → {country} (confidence: {confidence})")
-            print(f"   📝 Context: {product_context}")
-            print(f"   💡 Reasoning: {reasoning}")
-            
+            print(f" CONTEXT-LEARNED: {context_key} → {country} (confidence: {confidence})")
+            print(f"    Context: {product_context}")
+            print(f"    Reasoning: {reasoning}")
+
         except Exception as e:
-            print(f"⚠️ Failed to save context-specific learning: {e}")
+            print(f" Failed to save context-specific learning: {e}")
 
 
 def extract_comprehensive_product_attributes(driver, material=None, weight=None):
     """
-    🔍 COMPREHENSIVE PRODUCT ATTRIBUTES EXTRACTION
-    
+     COMPREHENSIVE PRODUCT ATTRIBUTES EXTRACTION
+
     Extracts detailed product attributes from Amazon's product details table
     to enable sophisticated origin detection analysis.
-    
+
     Target Attributes:
     - Material Type (e.g., "Polyester")
     - Style (e.g., "Metro 30")
-    - Seasons (e.g., "spring/summer 2016") 
+    - Seasons (e.g., "spring/summer 2016")
     - Features (e.g., "Hydration Bladder Holder")
     - Usage/Sport (e.g., "Hiking")
     - Size/Volume (e.g., "30 Litre")
     - Outer Material
-    
+
     Returns: dict with extracted attributes
     """
     attributes = {}
-    
+
     # Add pre-extracted material and weight if available
     if material:
         attributes['material_type'] = material
     if weight:
         attributes['weight'] = weight
-    
+
     try:
         # Extract from Amazon's product details table (multiple possible selectors)
         detail_selectors = [
             "#detailBullets_feature_div li",  # Bullet points format
-            "table.a-keyvalue tr",            # Table format  
+            "table.a-keyvalue tr",            # Table format
             "#productDetails_feature_div tr", # Product details section
             ".pdTab tr"                       # Alternative table format
         ]
-        
+
         detail_rows = []
         for selector in detail_selectors:
             try:
@@ -1351,79 +1351,79 @@ def extract_comprehensive_product_attributes(driver, material=None, weight=None)
                     detail_rows.extend(rows)
             except:
                 continue
-        
+
         # Parse detail rows for key product attributes
         for row in detail_rows:
             try:
                 text = row.text.strip().lower()
-                
+
                 # Material Type extraction (primary target for smart detection)
                 if "material type" in text and ":" in text and 'material_type' not in attributes:
                     material_match = re.search(r"material type[:\s]+(.+)", text, re.IGNORECASE)
                     if material_match:
                         attributes['material_type'] = material_match.group(1).strip()
-                
+
                 # Style extraction (key for naming pattern analysis)
                 if "style" in text and ":" in text:
                     style_match = re.search(r"style[:\s]+(.+)", text, re.IGNORECASE)
                     if style_match:
                         attributes['style'] = style_match.group(1).strip()
-                
+
                 # Seasons extraction (key for vintage/mass-market detection)
                 if "season" in text and ":" in text:
                     season_match = re.search(r"season[s]?[:\s]+(.+)", text, re.IGNORECASE)
                     if season_match:
                         attributes['seasons'] = season_match.group(1).strip()
-                
+
                 # Features extraction (hydration bladder, technical features, etc.)
                 if "feature" in text and ":" in text:
                     feature_match = re.search(r"feature[s]?[:\s]+(.+)", text, re.IGNORECASE)
                     if feature_match:
                         attributes['features'] = feature_match.group(1).strip()
-                
+
                 # Usage/Sport extraction (hiking, casual, etc.)
                 if any(keyword in text for keyword in ["usage", "sport", "activity"]) and ":" in text:
                     usage_match = re.search(r"(?:usage|sport|activity)[:\s]+(.+)", text, re.IGNORECASE)
                     if usage_match:
                         attributes['usage'] = usage_match.group(1).strip()
-                
+
                 # Size/Volume extraction
                 if any(keyword in text for keyword in ["size", "volume", "capacity"]) and ":" in text:
                     size_match = re.search(r"(?:size|volume|capacity)[:\s]+(.+)", text, re.IGNORECASE)
                     if size_match:
                         attributes['size'] = size_match.group(1).strip()
-                
+
                 # Outer material (additional material info)
                 if "outer material" in text and ":" in text:
                     outer_match = re.search(r"outer material[:\s]+(.+)", text, re.IGNORECASE)
                     if outer_match:
                         attributes['outer_material'] = outer_match.group(1).strip()
-                        
+
             except Exception as e:
                 continue
-        
+
         # Log extracted attributes for debugging
         if attributes:
             attr_summary = ", ".join([f"{k}: {v}" for k, v in attributes.items() if k not in ['weight']])
-            print(f"📊 Extracted product attributes: {attr_summary}")
-        
+            print(f" Extracted product attributes: {attr_summary}")
+
     except Exception as e:
-        print(f"⚠️ Error extracting product attributes: {e}")
-    
+        print(f" Error extracting product attributes: {e}")
+
     return attributes
 
 
 def extract_product_context(product_title):
     """
     Extract key product context indicators for learning
-    
+
     Examples:
     - "Karrimor Hiking Boots Waterproof" → "hiking_boots"
-    - "Nike Air Max Casual Sneakers" → "casual_sneakers"  
+    - "Nike Air Max Casual Sneakers" → "casual_sneakers"
     - "North Face Technical Jacket Gore-Tex" → "technical_jacket"
     """
     title_lower = product_title.lower()
-    
+
     # Product type extraction
     product_types = {
         "boots": ["boots", "boot"],
@@ -1437,27 +1437,27 @@ def extract_product_context(product_title):
         "smartphone": ["phone", "smartphone"],
         "laptop": ["laptop", "computer"]
     }
-    
+
     # Quality/market tier extraction
     quality_tiers = {
         "premium": ["premium", "professional", "pro", "technical", "gore-tex", "waterproof"],
         "casual": ["casual", "everyday", "basic", "lifestyle"],
         "kids": ["kids", "children", "child", "youth"]
     }
-    
+
     detected_type = "generic"
     detected_tier = "standard"
-    
+
     for ptype, keywords in product_types.items():
         if any(kw in title_lower for kw in keywords):
             detected_type = ptype
             break
-    
+
     for tier, keywords in quality_tiers.items():
         if any(kw in title_lower for kw in keywords):
             detected_tier = tier
             break
-    
+
     if detected_tier != "standard":
         return f"{detected_tier}_{detected_type}"
     else:
@@ -1466,86 +1466,86 @@ def extract_product_context(product_title):
 
 def check_learned_context_patterns(brand_key, product_title):
     """
-    🎓 CHECK LEARNED CONTEXT PATTERNS
-    
+     CHECK LEARNED CONTEXT PATTERNS
+
     Checks for previously learned brand+product_type combinations before running fresh smart detection.
     This leverages the auto-learning system to provide faster, more accurate results.
-    
+
     Example lookups:
     - "karrimor_hiking_boots" → UK (learned from previous detection)
     - "karrimor_casual_backpack" → China (learned from previous detection)
     - "nike_premium_running" → USA (learned from previous detection)
-    
+
     Args:
         brand_key (str): Lowercase brand name
         product_title (str): Full product title for context extraction
-        
+
     Returns:
         dict: {"country": str, "confidence": str, "reasoning": str}
     """
     global brand_locations
-    
+
     # Extract product context for lookup
     product_context = extract_product_context(product_title)
     context_key = f"{brand_key}_{product_context}"
-    
+
     try:
         # Check if we have learned this specific brand+context combination
         if context_key in brand_locations:
             learned_data = brand_locations[context_key]
             country = learned_data.get("origin", {}).get("country", "Unknown")
-            
+
             if country and country != "Unknown":
                 return {
                     "country": country,
                     "confidence": "high",  # High confidence because it's learned from previous successful detection
-                    "reasoning": f"🎓 Learned pattern: {brand_key} {product_context} → {country} (from previous smart detection)"
+                    "reasoning": f" Learned pattern: {brand_key} {product_context} → {country} (from previous smart detection)"
                 }
-        
+
         # Also check variations without quality tier (e.g., check "karrimor_hiking" if "karrimor_premium_hiking" not found)
         if "_" in product_context:
             parts = product_context.split("_")
             if len(parts) > 1:
                 simplified_context = "_".join(parts[1:])  # Remove quality tier
                 simplified_key = f"{brand_key}_{simplified_context}"
-                
+
                 if simplified_key in brand_locations:
                     learned_data = brand_locations[simplified_key]
                     country = learned_data.get("origin", {}).get("country", "Unknown")
-                    
+
                     if country and country != "Unknown":
                         return {
                             "country": country,
                             "confidence": "medium",  # Medium confidence for simplified match
-                            "reasoning": f"🎓 Learned pattern (simplified): {brand_key} {simplified_context} → {country}"
+                            "reasoning": f" Learned pattern (simplified): {brand_key} {simplified_context} → {country}"
                         }
-    
+
     except Exception as e:
-        print(f"⚠️ Error checking learned context patterns: {e}")
-    
+        print(f" Error checking learned context patterns: {e}")
+
     # No learned pattern found
     return {
         "country": "Unknown",
         "confidence": "unknown",
-        "reasoning": f"❌ No learned context pattern found for {context_key}"
+        "reasoning": f" No learned context pattern found for {context_key}"
     }
 
 
 def auto_learn_brand_origin(brand_key, country, reasoning, confidence):
     """
-    🚀 AUTO-LEARNING SYSTEM - Automatically saves successful brand origin detections
-    
+     AUTO-LEARNING SYSTEM - Automatically saves successful brand origin detections
+
     This function updates the known_brand_origins database when we successfully
     detect a brand's origin using smart detection methods.
     """
     global known_brand_origins
-    
+
     # Only learn from medium/high confidence detections
     if confidence in ["medium", "high"] and country not in ["Unknown", "China"]:  # Avoid learning generic "China" fallbacks
-        
+
         # Update in-memory database
         known_brand_origins[brand_key] = country
-        
+
         # Save to brand_locations.json for persistence
         try:
             brand_locations[brand_key] = {
@@ -1560,70 +1560,70 @@ def auto_learn_brand_origin(brand_key, country, reasoning, confidence):
                 "learned_at": datetime.now().isoformat()
             }
             save_brand_locations()
-            print(f"🎓 AUTO-LEARNED: {brand_key} → {country} (confidence: {confidence})")
-            print(f"   📝 Reasoning: {reasoning}")
-            
+            print(f" AUTO-LEARNED: {brand_key} → {country} (confidence: {confidence})")
+            print(f"    Reasoning: {reasoning}")
+
         except Exception as e:
-            print(f"⚠️ Failed to save learned brand origin: {e}")
+            print(f" Failed to save learned brand origin: {e}")
 
 
 def smart_detect_brand_origin(brand_name, product_title=""):
     """
-    🧠 SMART BRAND ORIGIN DETECTION - Automatically detects brand origins using multiple strategies
-    
+     SMART BRAND ORIGIN DETECTION - Automatically detects brand origins using multiple strategies
+
     Detection Methods:
     1. Language/suffix analysis (e.g., GmbH = Germany, Ltd = UK)
     2. Brand name patterns (Germanic, French, Italian origins)
     3. Industry clustering (luxury fashion → Italy/France)
     4. Web scraping brand info (fallback)
     5. Machine learning brand classification
-    
+
     Returns: {"country": str, "confidence": str, "reasoning": str}
     """
     brand_lower = brand_name.lower().strip()
-    
+
     # METHOD 1: Company Legal Structure Analysis
     company_suffixes = {
         # German companies
         "gmbh": {"country": "Germany", "confidence": "high", "reasoning": "German legal structure (GmbH)"},
         "ag": {"country": "Germany", "confidence": "high", "reasoning": "German legal structure (AG)"},
-        
-        # UK companies  
+
+        # UK companies
         "ltd": {"country": "UK", "confidence": "medium", "reasoning": "UK legal structure (Ltd)"},
         "limited": {"country": "UK", "confidence": "medium", "reasoning": "UK legal structure (Limited)"},
         "plc": {"country": "UK", "confidence": "high", "reasoning": "UK legal structure (PLC)"},
-        
+
         # US companies
         "inc": {"country": "USA", "confidence": "medium", "reasoning": "US legal structure (Inc)"},
         "corp": {"country": "USA", "confidence": "medium", "reasoning": "US legal structure (Corp)"},
         "llc": {"country": "USA", "confidence": "medium", "reasoning": "US legal structure (LLC)"},
-        
+
         # French companies
         "sa": {"country": "France", "confidence": "medium", "reasoning": "French legal structure (SA)"},
         "sarl": {"country": "France", "confidence": "high", "reasoning": "French legal structure (SARL)"},
-        
+
         # Italian companies
         "spa": {"country": "Italy", "confidence": "high", "reasoning": "Italian legal structure (SpA)"},
         "srl": {"country": "Italy", "confidence": "high", "reasoning": "Italian legal structure (Srl)"},
-        
+
         # Dutch companies
         "bv": {"country": "Netherlands", "confidence": "high", "reasoning": "Dutch legal structure (BV)"},
         "nv": {"country": "Netherlands", "confidence": "high", "reasoning": "Dutch legal structure (NV)"},
-        
+
         # Scandinavian companies
         "ab": {"country": "Sweden", "confidence": "high", "reasoning": "Swedish legal structure (AB)"},
         "oy": {"country": "Finland", "confidence": "high", "reasoning": "Finnish legal structure (Oy)"},
         "as": {"country": "Norway", "confidence": "high", "reasoning": "Norwegian legal structure (AS)"},
     }
-    
+
     for suffix, data in company_suffixes.items():
         if brand_lower.endswith(suffix) or f" {suffix}" in brand_lower:
             return {
                 "country": data["country"],
-                "confidence": data["confidence"], 
-                "reasoning": f"🏢 Company suffix analysis: {data['reasoning']}"
+                "confidence": data["confidence"],
+                "reasoning": f" Company suffix analysis: {data['reasoning']}"
             }
-    
+
     # METHOD 2: Brand Name Linguistic Analysis
     linguistic_patterns = {
         # German brand patterns
@@ -1632,7 +1632,7 @@ def smart_detect_brand_origin(brand_name, product_title=""):
             "indicators": ["sch", "mann", "haus", "werk", "meister"],
             "confidence": "medium"
         },
-        # French brand patterns  
+        # French brand patterns
         "France": {
             "patterns": ["le creuset", "sabatier", "laguiole", "cristel", "mauviel"],
             "indicators": ["le ", "la ", "des ", "chez"],
@@ -1657,87 +1657,87 @@ def smart_detect_brand_origin(brand_name, product_title=""):
             "confidence": "medium"
         }
     }
-    
+
     for country, data in linguistic_patterns.items():
         # Direct pattern match
         if brand_lower in data["patterns"]:
             return {
                 "country": country,
                 "confidence": data["confidence"],
-                "reasoning": f"🗣️ Linguistic pattern: '{brand_name}' matches known {country} brand patterns"
+                "reasoning": f" Linguistic pattern: '{brand_name}' matches known {country} brand patterns"
             }
-        
+
         # Linguistic indicator match
         if any(indicator in brand_lower for indicator in data["indicators"]):
             return {
-                "country": country, 
+                "country": country,
                 "confidence": "low",
-                "reasoning": f"🗣️ Linguistic analysis: '{brand_name}' contains {country} language patterns"
+                "reasoning": f" Linguistic analysis: '{brand_name}' contains {country} language patterns"
             }
-    
+
     # METHOD 3: Industry + Brand Clustering
     product_lower = product_title.lower()
-    
+
     # Luxury kitchen/cutlery brands often German
     if any(word in product_lower for word in ["knife", "knives", "cutlery", "blade", "steel", "forged"]):
         if len(brand_name) > 5 and any(char in brand_lower for char in "äöüß"):  # German characters
             return {
                 "country": "Germany",
                 "confidence": "medium",
-                "reasoning": f"🔪 Cutlery + Germanic brand name suggests German manufacturing"
+                "reasoning": f" Cutlery + Germanic brand name suggests German manufacturing"
             }
-    
+
     # Luxury cookware patterns
     if any(word in product_lower for word in ["cookware", "pan", "pot", "casserole", "dutch oven"]):
         # French luxury cookware tradition
         if any(indicator in brand_lower for indicator in ["le", "la", "du", "des"]):
             return {
                 "country": "France",
-                "confidence": "medium", 
-                "reasoning": f"🍳 French cookware tradition + linguistic patterns"
+                "confidence": "medium",
+                "reasoning": f" French cookware tradition + linguistic patterns"
             }
-    
+
     # METHOD 4: Brand Reputation Analysis
     premium_indicators = ["premium", "luxury", "professional", "chef", "artisan", "handcrafted"]
     if any(word in product_lower for word in premium_indicators):
-        
+
         # German engineering reputation for premium tools/kitchen
         if any(word in product_lower for word in ["precision", "engineering", "forged", "quality"]):
             return {
                 "country": "Germany",
                 "confidence": "low",
-                "reasoning": f"🎯 Premium engineering language suggests German origin"
+                "reasoning": f" Premium engineering language suggests German origin"
             }
-        
-        # Japanese precision reputation  
+
+        # Japanese precision reputation
         if any(word in product_lower for word in ["sharp", "precision", "blade", "steel"]):
             return {
                 "country": "Japan",
-                "confidence": "low", 
-                "reasoning": f"🗾 Premium blade/precision language suggests Japanese craftsmanship"
+                "confidence": "low",
+                "reasoning": f" Premium blade/precision language suggests Japanese craftsmanship"
             }
-    
+
     # METHOD 5: Wikipedia/Web Search Fallback (if other methods fail)
     # This could be implemented as a web scraping fallback for completely unknown brands
-    
+
     # METHOD 6: Domain Analysis (if brand includes website info)
     domain_patterns = {
-        ".de": "Germany", ".fr": "France", ".it": "Italy", ".co.uk": "UK", 
+        ".de": "Germany", ".fr": "France", ".it": "Italy", ".co.uk": "UK",
         ".jp": "Japan", ".kr": "South Korea", ".com.au": "Australia"
     }
-    
+
     for domain, country in domain_patterns.items():
         if domain in brand_lower:
             return {
                 "country": country,
                 "confidence": "medium",
-                "reasoning": f"🌐 Domain analysis: '{domain}' suggests {country} origin"
+                "reasoning": f" Domain analysis: '{domain}' suggests {country} origin"
             }
-    
+
     return {
         "country": "Unknown",
         "confidence": "unknown",
-        "reasoning": f"❓ No detectable origin patterns for brand: {brand_name}"
+        "reasoning": f" No detectable origin patterns for brand: {brand_name}"
     }
 
 
@@ -1748,8 +1748,8 @@ def get_brand_intelligent_origin(brand_name, product_title="", product_category=
     """
     brand_lower = brand_name.lower().strip()
     title_lower = product_title.lower()
-    
-    # 🚀 MASSIVELY EXPANDED Brand Intelligence Database
+
+    #  MASSIVELY EXPANDED Brand Intelligence Database
     # Multi-location brands with product-specific manufacturing patterns
     brand_intelligence = {
         # Kitchen Appliances
@@ -1764,7 +1764,7 @@ def get_brand_intelligent_origin(brand_name, product_title="", product_category=
             }
         },
         "instant pot": {
-            "headquarters": "Canada", 
+            "headquarters": "Canada",
             "manufacturing_patterns": {
                 "pressure cooker": {"primary": "China", "confidence": "high"},
                 "air fryer": {"primary": "China", "confidence": "high"},
@@ -1787,7 +1787,7 @@ def get_brand_intelligent_origin(brand_name, product_title="", product_category=
                 "default": {"primary": "USA", "confidence": "low"}
             }
         },
-        
+
         # Electronics & Technology
         "apple": {
             "headquarters": "USA",
@@ -1828,7 +1828,7 @@ def get_brand_intelligent_origin(brand_name, product_title="", product_category=
                 "default": {"primary": "South Korea", "confidence": "medium"}
             }
         },
-        
+
         # Automotive
         "bmw": {
             "headquarters": "Germany",
@@ -1840,7 +1840,7 @@ def get_brand_intelligent_origin(brand_name, product_title="", product_category=
             }
         },
         "mercedes": {
-            "headquarters": "Germany", 
+            "headquarters": "Germany",
             "manufacturing_patterns": {
                 "car": {"primary": "Germany", "secondary": "USA", "confidence": "high"},
                 "truck": {"primary": "Germany", "confidence": "high"},
@@ -1857,7 +1857,7 @@ def get_brand_intelligent_origin(brand_name, product_title="", product_category=
                 "default": {"primary": "Japan", "confidence": "high"}
             }
         },
-        
+
         # Fashion & Apparel
         "nike": {
             "headquarters": "USA",
@@ -1877,7 +1877,7 @@ def get_brand_intelligent_origin(brand_name, product_title="", product_category=
                 "default": {"primary": "Vietnam", "confidence": "high"}
             }
         },
-        
+
         # Tools & Equipment
         "bosch": {
             "headquarters": "Germany",
@@ -1906,7 +1906,7 @@ def get_brand_intelligent_origin(brand_name, product_title="", product_category=
                 "default": {"primary": "Germany", "confidence": "high"}
             }
         },
-        
+
         # Home & Garden
         "ikea": {
             "headquarters": "Sweden",
@@ -1927,11 +1927,11 @@ def get_brand_intelligent_origin(brand_name, product_title="", product_category=
             }
         }
     }
-    
+
     if brand_lower in brand_intelligence:
         brand_info = brand_intelligence[brand_lower]
         patterns = brand_info["manufacturing_patterns"]
-        
+
         # Try to match product category/type
         best_match = None
         for product_type, location_info in patterns.items():
@@ -1939,22 +1939,22 @@ def get_brand_intelligent_origin(brand_name, product_title="", product_category=
                 best_match = location_info
                 reasoning = f"Brand {brand_name} + product type '{product_type}' → {location_info['primary']}"
                 break
-        
+
         if not best_match:
             best_match = patterns.get("default", {"primary": "Unknown", "confidence": "unknown"})
             reasoning = f"Brand {brand_name} default manufacturing location"
-        
+
         return {
             "country": best_match["primary"],
             "confidence": best_match["confidence"],
             "reasoning": reasoning
         }
-    
-    # 🚀 SMART BRAND ORIGIN DETECTION for unknown brands
+
+    #  SMART BRAND ORIGIN DETECTION for unknown brands
     detected_origin = smart_detect_brand_origin(brand_name, product_title)
     if detected_origin["country"] != "Unknown":
         return detected_origin
-    
+
     # Fallback for unknown brands - try simple heuristics
     if any(word in title_lower for word in ["kitchen", "cooking", "appliance"]):
         return {
@@ -1962,49 +1962,49 @@ def get_brand_intelligent_origin(brand_name, product_title="", product_category=
             "confidence": "low",
             "reasoning": "Generic kitchen appliance → likely China manufacturing"
         }
-    
+
     return {
         "country": "Unknown",
-        "confidence": "unknown", 
+        "confidence": "unknown",
         "reasoning": f"No intelligence available for brand: {brand_name}"
     }
 
 
 def resolve_origin(scraped, fallback, field_name="country", context=None):
     """
-    🎯 MODULAR FIELD RESOLUTION - Intelligent conflict resolution with confidence scoring
-    
+     MODULAR FIELD RESOLUTION - Intelligent conflict resolution with confidence scoring
+
     This function implements enterprise-grade logic for resolving conflicts between
     scraped data and fallback mappings. Can be reused for any field (origin, material, packaging).
-    
+
     Args:
         scraped: dict with {"value": str, "source": str, "confidence": str}
-        fallback: dict with {"value": str, "source": str, "confidence": str} 
+        fallback: dict with {"value": str, "source": str, "confidence": str}
         field_name: str - name of field being resolved (for logging)
         context: dict - additional context (brand_name, product_title, category, etc.)
-        
+
     Returns: dict with {"value": str, "confidence": str, "source": str, "reasoning": str}
-    
+
     Logic Rules (as requested):
     1. If scraped matches fallback → high confidence
-    2. If they don't match → intelligent logic using source trust hierarchy  
+    2. If they don't match → intelligent logic using source trust hierarchy
     3. If only fallback exists → medium confidence
     4. If neither exists → "Unknown" with low confidence
     """
-    
+
     # Normalize inputs
     scraped_value = scraped.get("value", "Unknown") if scraped else "Unknown"
     scraped_source = scraped.get("source", "none") if scraped else "none"
     fallback_value = fallback.get("value", "Unknown") if fallback else "Unknown"
     fallback_source = fallback.get("source", "none") if fallback else "none"
-    
+
     context = context or {}
     brand_name = context.get("brand_name", "")
-    
+
     # Source trust hierarchy (higher = more trustworthy)
     source_trust_scores = {
         "page_explicit": 95,        # Direct "Made in China" text
-        "techspec_origin": 90,      # Technical specifications section  
+        "techspec_origin": 90,      # Technical specifications section
         "product_details": 85,      # Product details table
         "blob_fallback": 75,        # Pattern matching in descriptions
         "brand_intelligence": 70,   # AI context-aware analysis
@@ -2014,31 +2014,31 @@ def resolve_origin(scraped, fallback, field_name="country", context=None):
         "title_guess": 30,          # Heuristic pattern matching
         "none": 0
     }
-    
+
     scraped_trust = source_trust_scores.get(scraped_source, 0)
     fallback_trust = source_trust_scores.get(fallback_source, 0)
-    
-    # 🎯 RULE 1: Perfect Match → High Confidence
+
+    #  RULE 1: Perfect Match → High Confidence
     if scraped_value != "Unknown" and fallback_value != "Unknown" and scraped_value == fallback_value:
         return {
             "value": scraped_value,
             "confidence": "very_high",
             "source": f"{scraped_source}_confirmed",
-            "reasoning": f"✅ Scraped data ({scraped_source}) matches fallback ({fallback_source}): {scraped_value}"
+            "reasoning": f" Scraped data ({scraped_source}) matches fallback ({fallback_source}): {scraped_value}"
         }
-    
-    # 🎯 RULE 2: Conflict Resolution → Trust Hierarchy + Context
+
+    #  RULE 2: Conflict Resolution → Trust Hierarchy + Context
     elif scraped_value != "Unknown" and fallback_value != "Unknown" and scraped_value != fallback_value:
-        
+
         # High-trust scraped data wins
         if scraped_trust >= 85:
             return {
                 "value": scraped_value,
-                "confidence": "high", 
+                "confidence": "high",
                 "source": scraped_source,
-                "reasoning": f"📄 High-trust page data ({scraped_source}) overrides fallback: {scraped_value} vs {fallback_value}"
+                "reasoning": f" High-trust page data ({scraped_source}) overrides fallback: {scraped_value} vs {fallback_value}"
             }
-        
+
         # Medium-trust scraped vs fallback → context matters
         elif scraped_trust >= 60:
             if fallback_trust <= 50:  # Scraped wins over weak fallback
@@ -2046,7 +2046,7 @@ def resolve_origin(scraped, fallback, field_name="country", context=None):
                     "value": scraped_value,
                     "confidence": "medium_high",
                     "source": scraped_source,
-                    "reasoning": f"📝 Medium-trust scraped data ({scraped_source}) preferred over weak fallback: {scraped_value}"
+                    "reasoning": f" Medium-trust scraped data ({scraped_source}) preferred over weak fallback: {scraped_value}"
                 }
             else:  # Close call → choose higher trust
                 winner = scraped_value if scraped_trust >= fallback_trust else fallback_value
@@ -2054,92 +2054,92 @@ def resolve_origin(scraped, fallback, field_name="country", context=None):
                 return {
                     "value": winner,
                     "confidence": "medium",
-                    "source": f"{winner_source}_contested", 
-                    "reasoning": f"⚖️ Close contest: {scraped_value}({scraped_trust}) vs {fallback_value}({fallback_trust}) → chose {winner}"
+                    "source": f"{winner_source}_contested",
+                    "reasoning": f" Close contest: {scraped_value}({scraped_trust}) vs {fallback_value}({fallback_trust}) → chose {winner}"
                 }
-        
+
         # Low-trust scraped → fallback wins
         else:
             return {
                 "value": fallback_value,
                 "confidence": "medium",
                 "source": f"{fallback_source}_override",
-                "reasoning": f"🔄 Fallback overrides low-trust scraped: {fallback_value} (fallback) vs {scraped_value} (weak scraped)"
+                "reasoning": f" Fallback overrides low-trust scraped: {fallback_value} (fallback) vs {scraped_value} (weak scraped)"
             }
-    
-    # 🎯 RULE 3: Only Scraped Data Available
+
+    #  RULE 3: Only Scraped Data Available
     elif scraped_value != "Unknown" and fallback_value == "Unknown":
         confidence_map = {
             (95, 100): "high",
-            (75, 94): "medium_high", 
+            (75, 94): "medium_high",
             (50, 74): "medium",
             (0, 49): "low_medium"
         }
-        
+
         confidence = "low"
         for (min_score, max_score), conf_level in confidence_map.items():
             if min_score <= scraped_trust <= max_score:
                 confidence = conf_level
                 break
-                
+
         return {
             "value": scraped_value,
             "confidence": confidence,
             "source": scraped_source,
-            "reasoning": f"📋 Only scraped data available from {scraped_source}: {scraped_value} (trust: {scraped_trust})"
+            "reasoning": f" Only scraped data available from {scraped_source}: {scraped_value} (trust: {scraped_trust})"
         }
-    
-    # 🎯 RULE 4: Only Fallback Available → Medium Confidence  
+
+    #  RULE 4: Only Fallback Available → Medium Confidence
     elif scraped_value == "Unknown" and fallback_value != "Unknown":
         return {
             "value": fallback_value,
             "confidence": "medium",
             "source": fallback_source,
-            "reasoning": f"🔄 Fallback only: {fallback_value} from {fallback_source} (no scraped data found)"
+            "reasoning": f" Fallback only: {fallback_value} from {fallback_source} (no scraped data found)"
         }
-    
-    # 🎯 RULE 5: No Data Available → Unknown with Low Confidence
+
+    #  RULE 5: No Data Available → Unknown with Low Confidence
     else:
         return {
             "value": "Unknown",
             "confidence": "none",
             "source": "no_data",
-            "reasoning": f"❌ No reliable {field_name} data found for {brand_name or 'product'}"
+            "reasoning": f" No reliable {field_name} data found for {brand_name or 'product'}"
         }
 
 
 def validate_and_merge_origin_sources(scraped_origin, scraped_source, brand_name, product_title=""):
     """
-    🔄 ENHANCED ORIGIN RESOLUTION - Now powered by modular resolve_origin() function
-    
+     ENHANCED ORIGIN RESOLUTION - Now powered by modular resolve_origin() function
+
     This function maintains backward compatibility while leveraging the new modular
     resolve_origin() system with enhanced brand intelligence integration.
-    
+
     Hierarchical Resolution:
     1. Scraped data vs Brand Intelligence (AI-powered contextual analysis)
     2. If no high-confidence match → resolve_origin() with fallback chain
     3. Brand DB fallback as final option
-    
+
     Returns: {"country": str, "confidence": str, "source": str, "reasoning": str}
     """
-    
+
     # Get brand intelligence prediction (AI-powered contextual analysis)
     brand_intel = get_brand_intelligent_origin(brand_name, product_title)
-    
-    # Get generic brand fallback  
+
+    # Get generic brand fallback
     generic_brand = resolve_brand_origin(brand_name, product_title)
     generic_country = generic_brand[0] if generic_brand else "Unknown"
-    
+
     # Step 1: Check for perfect agreement between scraped data and brand intelligence
-    if (scraped_origin != "Unknown" and brand_intel["country"] != "Unknown" and 
+    if (scraped_origin != "Unknown" and brand_intel["country"] != "Unknown" and
         scraped_origin == brand_intel["country"]):
         return {
             "country": scraped_origin,
-            "confidence": "very_high", 
+            "confidence": "very_high",
             "source": f"{scraped_source}_ai_validated",
-            "reasoning": f"✅ Perfect match: Scraped ({scraped_source}) + AI intelligence agree on {scraped_origin}"
+            "reasoning": f" Perfect match: Scraped ({scraped_source}) + AI intelligence agree on {scraped_origin}"
         }
-    
+
     # Step 2: Use modular resolve_origin for intelligent conflict resolution
     # Create structured input for the modular function
     scraped_data = {
@@ -2147,13 +2147,13 @@ def validate_and_merge_origin_sources(scraped_origin, scraped_source, brand_name
         "source": scraped_source,
         "confidence": "scraped"
     } if scraped_origin != "Unknown" else None
-    
+
     # Prioritize brand intelligence over generic brand DB
     best_fallback = None
     if brand_intel["country"] != "Unknown" and brand_intel["confidence"] in ["high", "medium"]:
         best_fallback = {
             "value": brand_intel["country"],
-            "source": "brand_intelligence", 
+            "source": "brand_intelligence",
             "confidence": brand_intel["confidence"]
         }
     elif generic_country != "Unknown":
@@ -2162,28 +2162,28 @@ def validate_and_merge_origin_sources(scraped_origin, scraped_source, brand_name
             "source": "brand_db_generic",
             "confidence": "low"
         }
-    
+
     # Apply modular resolution logic
     context = {
         "brand_name": brand_name,
         "product_title": product_title
     }
-    
+
     result = resolve_origin(scraped_data, best_fallback, "country", context)
-    
+
     # Step 3: Enhance reasoning with brand intelligence context when applicable
     if best_fallback and best_fallback["source"] == "brand_intelligence":
         if "brand_intelligence" in result["source"]:
-            result["reasoning"] = f"🧠 {brand_intel['reasoning']} (AI analysis)"
+            result["reasoning"] = f" {brand_intel['reasoning']} (AI analysis)"
         elif result["value"] == brand_intel["country"]:
             result["reasoning"] += f" | AI concurs: {brand_intel['reasoning']}"
         elif brand_intel["country"] != "Unknown":
             result["reasoning"] += f" | AI suggested: {brand_intel['country']} ({brand_intel['reasoning']})"
-    
+
     # Map new modular function output to legacy field names for compatibility
     return {
         "country": result["value"],
-        "confidence": result["confidence"], 
+        "confidence": result["confidence"],
         "source": result["source"],
         "reasoning": result["reasoning"]
     }
@@ -2200,10 +2200,10 @@ def apply_validation_to_origin_detection(origin_country, origin_source, brand_ke
         brand_name=brand_key,
         product_title=title
     )
-    
-    print(f"🔍 Origin Validation Result: {validation_result['reasoning']}")
-    print(f"📊 Final: {validation_result['country']} (confidence: {validation_result['confidence']})")
-    
+
+    print(f" Origin Validation Result: {validation_result['reasoning']}")
+    print(f" Final: {validation_result['country']} (confidence: {validation_result['confidence']})")
+
     return (
         validation_result["country"],
         origin_hubs.get(validation_result["country"], {}).get("city", "Unknown"),
@@ -2212,91 +2212,87 @@ def apply_validation_to_origin_detection(origin_country, origin_source, brand_ke
     )
 
 
-# 🎯 MODULAR FIELD RESOLUTION EXAMPLES - Demonstrating reusability
+#  MODULAR FIELD RESOLUTION EXAMPLES - Demonstrating reusability
 # These functions show how resolve_origin() can be reused for any product field
 
 def resolve_material(scraped_material_data, brand_name, product_title=""):
     """
-    📦 MATERIAL RESOLUTION - Uses modular resolve_origin() for material detection
-    
+     MATERIAL RESOLUTION - Uses modular resolve_origin() for material detection
+
     Example usage of the modular system for material field resolution.
     Demonstrates how the same intelligent logic applies to any product attribute.
     """
-    
+
     # Scraped material data (from Amazon product page)
     scraped = {
         "value": scraped_material_data.get("material", "Unknown"),
         "source": scraped_material_data.get("source", "none"), # e.g. "techspec_material", "title_guess"
         "confidence": scraped_material_data.get("confidence", "medium")
     } if scraped_material_data.get("material") != "Unknown" else None
-    
-    # Material fallback data (from brand intelligence or category defaults)
+
     material_fallbacks = {
         "apple": {"value": "Aluminum", "source": "brand_db_verified", "confidence": "high"},
         "nike": {"value": "Synthetic", "source": "brand_db_verified", "confidence": "medium"},
         "ikea": {"value": "Wood", "source": "brand_db_generic", "confidence": "medium"}
     }
-    
+
     fallback = material_fallbacks.get(brand_name.lower())
-    
+
     context = {
         "brand_name": brand_name,
         "product_title": product_title,
         "field_type": "material"
     }
-    
-    # Use the same modular logic for material resolution
+
     result = resolve_origin(scraped, fallback, "material", context)
-    
+
     return {
         "material": result["value"],
         "confidence": result["confidence"],
-        "source": result["source"], 
+        "source": result["source"],
         "reasoning": result["reasoning"]
     }
 
 
 def resolve_packaging(scraped_packaging_data, brand_name, product_title=""):
     """
-    📦 PACKAGING RESOLUTION - Uses modular resolve_origin() for packaging type detection
-    
+     PACKAGING RESOLUTION - Uses modular resolve_origin() for packaging type detection
+
     Another example showing how resolve_origin() applies to packaging field resolution
     with the same intelligent conflict resolution and confidence scoring.
     """
-    
-    # Scraped packaging data (from Amazon product specifications) 
+
+    # Scraped packaging data (from Amazon product specifications)
     scraped = {
         "value": scraped_packaging_data.get("packaging_type", "Unknown"),
         "source": scraped_packaging_data.get("source", "none"), # e.g. "product_details", "shipping_panel"
         "confidence": scraped_packaging_data.get("confidence", "medium")
     } if scraped_packaging_data.get("packaging_type") != "Unknown" else None
-    
+
     # Packaging fallback data (from category intelligence)
     packaging_patterns = {
         "electronics": {"value": "Plastic", "source": "category_default", "confidence": "medium"},
         "books": {"value": "Paper", "source": "category_default", "confidence": "high"},
         "food": {"value": "Mixed", "source": "category_default", "confidence": "medium"}
     }
-    
-    # Determine category from title/brand for fallback
-    product_category = "electronics"  # Could be enhanced with AI classification
+
+    product_category = "electronics"
     if any(word in product_title.lower() for word in ["book", "novel", "guide"]):
         product_category = "books"
     elif any(word in product_title.lower() for word in ["food", "snack", "organic"]):
         product_category = "food"
-        
+
     fallback = packaging_patterns.get(product_category)
-    
+
     context = {
         "brand_name": brand_name,
         "product_title": product_title,
         "product_category": product_category,
         "field_type": "packaging"
     }
-    
-    # Same modular logic, different field
+
     result = resolve_origin(scraped, fallback, "packaging_type", context)
-    
+
     return {
         "packaging_type": result["value"],
         "confidence": result["confidence"],
@@ -2307,12 +2303,12 @@ def resolve_packaging(scraped_packaging_data, brand_name, product_title=""):
 
 def demonstrate_modular_usage():
     """
-    🚀 DEMONSTRATION - Shows how the modular resolve_origin() works across different fields
-    
+     DEMONSTRATION - Shows how the modular resolve_origin() works across different fields
+
     This function provides working examples of how to use the modular system
     for any product attribute with consistent intelligent resolution logic.
     """
-    
+
     # Example product data
     product_data = {
         "brand": "Apple",
@@ -2321,10 +2317,10 @@ def demonstrate_modular_usage():
         "scraped_material": {"value": "Titanium", "source": "product_details"},
         "scraped_packaging": {"value": "Cardboard", "source": "shipping_panel"}
     }
-    
-    print("🎯 MODULAR FIELD RESOLUTION DEMO")
+
+    print(" MODULAR FIELD RESOLUTION DEMO")
     print("=" * 50)
-    
+
     # 1. Origin Resolution
     origin_result = validate_and_merge_origin_sources(
         scraped_origin=product_data["scraped_origin"]["value"],
@@ -2332,32 +2328,32 @@ def demonstrate_modular_usage():
         brand_name=product_data["brand"],
         product_title=product_data["title"]
     )
-    print(f"🌍 ORIGIN: {origin_result['country']} ({origin_result['confidence']})")
+    print(f" ORIGIN: {origin_result['country']} ({origin_result['confidence']})")
     print(f"   Reasoning: {origin_result['reasoning']}")
-    
-    # 2. Material Resolution  
+
+    # 2. Material Resolution
     material_result = resolve_material(
         scraped_material_data=product_data["scraped_material"],
         brand_name=product_data["brand"],
         product_title=product_data["title"]
     )
-    print(f"\n🔧 MATERIAL: {material_result['material']} ({material_result['confidence']})")
+    print(f"\n MATERIAL: {material_result['material']} ({material_result['confidence']})")
     print(f"   Reasoning: {material_result['reasoning']}")
-    
+
     # 3. Packaging Resolution
     packaging_result = resolve_packaging(
         scraped_packaging_data=product_data["scraped_packaging"],
         brand_name=product_data["brand"],
         product_title=product_data["title"]
     )
-    print(f"\n📦 PACKAGING: {packaging_result['packaging_type']} ({packaging_result['confidence']})")
+    print(f"\n PACKAGING: {packaging_result['packaging_type']} ({packaging_result['confidence']})")
     print(f"   Reasoning: {packaging_result['reasoning']}")
-    
-    print("\n✅ All fields resolved using the same modular resolve_origin() logic!")
-    
+
+    print("\n All fields resolved using the same modular resolve_origin() logic!")
+
     return {
         "origin": origin_result,
-        "material": material_result, 
+        "material": material_result,
         "packaging": packaging_result
     }
 
@@ -2379,7 +2375,7 @@ def extract_shipping_origin(driver):
             elif "france" in text:
                 return "France"
     except Exception as e:
-        Log.warn(f"⚠️ Could not extract shipping origin: {e}")
+        Log.warn(f" Could not extract shipping origin: {e}")
     return None
 
 
@@ -2402,10 +2398,10 @@ def maybe_add_to_priority(product, priority_db, save_path="priority_products.jso
 
         with open(save_path, "w", encoding="utf-8") as f:
             json.dump(priority_db, f, indent=2)
-        
-        Log.success(f"🔐 Added {asin} to priority_products.json")
+
+        Log.success(f" Added {asin} to priority_products.json")
         return True
-    
+
     return False
 
 
@@ -2438,15 +2434,15 @@ def extract_weight(text):
         # Even more flexible - just look for dimensions followed by weight
         r"[\d.]+\s*[x×]\s*[\d.]+\s*[x×]\s*[\d.]+\s*cm[;,\s]+([\d.]+)\s*g\b"
     ]
-    
+
     for pattern in dims_patterns:
         dims_match = re.search(pattern, text, re.IGNORECASE)
         if dims_match:
             weight_grams = float(dims_match.group(1))
-            print(f"⚖️ Found weight in dimensions: {weight_grams}g")
+            print(f" Found weight in dimensions: {weight_grams}g")
             return round(weight_grams / 1000, 3)
 
-    # 2. Match kg first (also handles "kilogram" or "kilograms")  
+    # 2. Match kg first (also handles "kilogram" or "kilograms")
     kg_match = re.search(r"([\d.]+)\s?(kg|kilogram|kilograms)", text)
     if kg_match:
         return round(float(kg_match.group(1)), 3)
@@ -2482,9 +2478,9 @@ def normalize_material(raw_material):
     """Normalize and prioritize material names"""
     if not raw_material:
         return "Unknown"
-    
+
     material_lower = raw_material.lower().strip()
-    
+
     # High-priority specific materials
     if "rubber" in material_lower:
         return "Rubber"
@@ -2506,7 +2502,7 @@ def normalize_material(raw_material):
         return "Synthetic"
     elif "fabric" in material_lower:
         return "Fabric"
-    # Medium-priority generic materials  
+    # Medium-priority generic materials
     elif "compound" in material_lower:
         return "Compound"
     elif "composite" in material_lower:
@@ -2526,19 +2522,19 @@ def normalize_material(raw_material):
 def extract_material(text):
     if not text:
         return None
-    
+
     text = text.lower()
-    
+
     # 1. Priority extraction from specific Amazon material fields (highest priority)
     specific_material_fields = [
         r"sole material\s*:?\s*([a-zA-Z\s\-,]+)",
-        r"outer material\s*:?\s*([a-zA-Z\s\-,]+)", 
+        r"outer material\s*:?\s*([a-zA-Z\s\-,]+)",
         r"upper material\s*:?\s*([a-zA-Z\s\-,]+)",
         r"lining material\s*:?\s*([a-zA-Z\s\-,]+)",
         r"main material\s*:?\s*([a-zA-Z\s\-,]+)",
         r"primary material\s*:?\s*([a-zA-Z\s\-,]+)"
     ]
-    
+
     # Check specific materials first (highest priority)
     for field_pattern in specific_material_fields:
         field_match = re.search(field_pattern, text, re.IGNORECASE)
@@ -2547,20 +2543,20 @@ def extract_material(text):
             # Clean up the material value
             raw_material = re.sub(r'[,;.].*$', '', raw_material).strip()
             raw_material = re.sub(r'\s+(and|or|with|plus).*$', '', raw_material, flags=re.IGNORECASE).strip()
-            
+
             # Prioritize specific materials over generic ones
             material = normalize_material(raw_material)
             if material and material != "Unknown":
-                print(f"🧬 Found HIGH PRIORITY material: '{raw_material}' → {material}")
+                print(f" Found HIGH PRIORITY material: '{raw_material}' → {material}")
                 return material
-    
+
     # 1.5. Check general material composition fields (medium priority)
     general_material_fields = [
         r"material composition\s*:?\s*([a-zA-Z\s\-,]+)",
         r"fabric type\s*:?\s*([a-zA-Z\s\-,]+)",
         r"material\s*:?\s*([a-zA-Z\s\-,]+)"
     ]
-    
+
     composition_material = None
     for field_pattern in general_material_fields:
         field_match = re.search(field_pattern, text, re.IGNORECASE)
@@ -2568,11 +2564,11 @@ def extract_material(text):
             raw_material = field_match.group(1).strip()
             raw_material = re.sub(r'[,;.].*$', '', raw_material).strip()
             raw_material = re.sub(r'\s+(and|or|with|plus).*$', '', raw_material, flags=re.IGNORECASE).strip()
-            
+
             material = normalize_material(raw_material)
             if material and material != "Unknown":
                 composition_material = material
-                print(f"🧬 Found MEDIUM PRIORITY material: '{raw_material}' → {material}")
+                print(f" Found MEDIUM PRIORITY material: '{raw_material}' → {material}")
                 break
 
     # 2. Handle detailed material compositions like "59% RUBBER, 16% POLYESTER, 7% TPU, 18% FOAM"
@@ -2585,7 +2581,7 @@ def extract_material(text):
             # Find material with highest percentage
             primary_material = max(percentage_matches, key=lambda x: int(x[0]))
             return primary_material[1].title()
-    
+
     # 3. Extract from construction field
     construction_match = re.search(r"construction\s*:?\s*([a-z\s\-]+)", text, re.IGNORECASE)
     if construction_match:
@@ -2594,24 +2590,24 @@ def extract_material(text):
         first_material = re.search(r"([a-z]+)", material, re.IGNORECASE)
         if first_material:
             return first_material.group(1).title()
-    
+
     # 4. General material extraction (original logic)
     general_match = re.search(r"(?:material|made of|composition)[\s:]+([a-z\s\-]+)", text, re.IGNORECASE)
     if general_match:
         return general_match.group(1).strip().title()
-    
+
     # 5. Direct material keywords
-    material_keywords = ["plastic", "rubber", "leather", "cotton", "polyester", "nylon", 
+    material_keywords = ["plastic", "rubber", "leather", "cotton", "polyester", "nylon",
                         "metal", "steel", "aluminum", "wood", "glass", "ceramic", "silicone"]
     for keyword in material_keywords:
         if keyword in text:
             return keyword.title()
-    
+
     # 6. Return composition material as fallback if found
     if composition_material:
-        print(f"🧬 Using FALLBACK composition material: {composition_material}")
+        print(f" Using FALLBACK composition material: {composition_material}")
         return composition_material
-    
+
     return None
 
 
@@ -2630,15 +2626,15 @@ def haversine(lat1, lon1, lat2, lon2):
 
 def calculate_global_distance(origin_country, destination_country):
     """
-    🌍 GLOBAL DISTANCE CALCULATOR
-    
+     GLOBAL DISTANCE CALCULATOR
+
     Calculate distance between any two countries using their manufacturing/logistics hubs.
     This replaces the UK-centric distance calculation with a flexible global system.
-    
+
     Args:
         origin_country (str): Manufacturing origin country (e.g., "China")
         destination_country (str): Destination country (e.g., "UK", "USA", "Germany")
-        
+
     Returns:
         dict: {
             "distance_km": float,
@@ -2647,40 +2643,38 @@ def calculate_global_distance(origin_country, destination_country):
             "route_type": str ("domestic", "regional", "international")
         }
     """
-    
-    # Get hub coordinates for both countries
+
     origin_hub = origin_hubs.get(origin_country)
     destination_hub = origin_hubs.get(destination_country)
-    
+
     # Fallback to UK if destination not found (backwards compatibility)
     if not destination_hub:
         destination_hub = origin_hubs.get("UK")
         destination_country = "UK"
-    
+
     # Fallback to major hubs if origin not found
     if not origin_hub:
-        print(f"⚠️ No hub data for {origin_country}, using China as fallback")
+        print(f" No hub data for {origin_country}, using China as fallback")
         origin_hub = origin_hubs.get("China")
         origin_country = "China"
-    
+
     # Calculate distance
     distance_km = round(haversine(
         origin_hub["lat"], origin_hub["lon"],
         destination_hub["lat"], destination_hub["lon"]
     ), 1)
-    
-    # Determine route type for logistics planning
+
     route_type = "domestic"
     if origin_country != destination_country:
         # Check if both countries are in same region
         origin_region = origin_hub.get("region", "Unknown")
         dest_region = destination_hub.get("region", "Unknown")
-        
+
         if origin_region == dest_region:
             route_type = "regional"  # e.g., Germany → France (both Europe)
         else:
             route_type = "international"  # e.g., China → UK (Asia → Europe)
-    
+
     return {
         "distance_km": distance_km,
         "origin_city": origin_hub["city"],
@@ -2693,31 +2687,31 @@ def calculate_global_distance(origin_country, destination_country):
 
 def get_optimal_transport_mode(distance_info):
     """
-    🚛 SMART TRANSPORT MODE SELECTION
-    
+     SMART TRANSPORT MODE SELECTION
+
     Determines optimal transport mode based on distance and route type.
     More accurate than the current country-based system.
-    
+
     Args:
         distance_info (dict): Output from calculate_global_distance()
-        
+
     Returns:
         str: "Land", "Air", "Ship"
     """
     distance_km = distance_info["distance_km"]
     route_type = distance_info["route_type"]
-    
+
     # Domestic transport
     if route_type == "domestic":
         return "Land"
-    
+
     # Regional transport (same continent)
     elif route_type == "regional":
         if distance_km < 1500:  # e.g., Germany → France
             return "Land"
         else:  # e.g., UK → Turkey
             return "Air"
-    
+
     # International transport (cross-continent)
     else:
         if distance_km > 8000:  # Very long distances (e.g., China → UK)
@@ -2726,7 +2720,7 @@ def get_optimal_transport_mode(distance_info):
             return "Air"  # Faster for medium distances
         else:  # Short international (e.g., UK → Ireland)
             return "Air"
-    
+
     return "Air"  # Default fallback
 
 
@@ -2736,7 +2730,7 @@ def resolve_brand_origin(brand_key, title_fallback=None):
 
     # Normalize brand key
     brand_key = brand_key.lower().strip()
-    
+
     # 0. Force known_brand_origins if available
     if brand_key in known_brand_origins:
         country = known_brand_origins[brand_key]
@@ -2760,22 +2754,22 @@ def resolve_brand_origin(brand_key, title_fallback=None):
 
     # 4. Intelligent brand resolution system (NEW ENHANCED DETECTION)
     else:
-        Log.warn(f"⚠️ Unrecognized brand: {brand_key}")
-        
+        Log.warn(f" Unrecognized brand: {brand_key}")
+
         # Try intelligent brand resolution first
         intelligent_result = get_brand_origin_intelligent(
-            brand=brand_key, 
+            brand=brand_key,
             product_title=title_fallback or "",
             additional_context=""
         )
-        
+
         # Use intelligent result if confidence is reasonable
         if intelligent_result["confidence"] >= 0.50:
             country = intelligent_result["country"]
             city = intelligent_result.get("city", "Unknown")
             if city == "Unknown":
                 city = origin_hubs.get(country, origin_hubs["UK"])["city"]
-            
+
             brand_locations[brand_key] = {
                 "origin": {
                     "country": country,
@@ -2784,9 +2778,9 @@ def resolve_brand_origin(brand_key, title_fallback=None):
                 "fulfillment": "UK"
             }
             save_brand_locations()
-            Log.success(f"🧠 Intelligent detection: {brand_key} → {country} (confidence: {intelligent_result['confidence']:.2f}, source: {intelligent_result['source']})")
+            Log.success(f" Intelligent detection: {brand_key} → {country} (confidence: {intelligent_result['confidence']:.2f}, source: {intelligent_result['source']})")
             return country, city
-        
+
         # 5. Fallback to basic title estimation
         elif title_fallback:
             guessed_country = estimate_origin_country(title_fallback)
@@ -2799,7 +2793,7 @@ def resolve_brand_origin(brand_key, title_fallback=None):
                 "fulfillment": "UK"
             }
             save_brand_locations()
-            Log.success(f"📦 Basic estimation from title: {brand_key} → {guessed_country}")
+            Log.success(f" Basic estimation from title: {brand_key} → {guessed_country}")
             return guessed_country, guessed_city
 
         # 6. Log unknown brand
@@ -2811,7 +2805,7 @@ def resolve_brand_origin(brand_key, title_fallback=None):
         with open("unrecognized_brands.txt", "a", encoding="utf-8") as log:
             log.write(f"{brand_key}\n")
         return "Unknown", "Unknown"
-    
+
 
 
 
@@ -2836,9 +2830,9 @@ def save_brand_locations():
     try:
         with open(BRAND_LOCATIONS_PATH, "w", encoding="utf-8") as f:
             json.dump(brand_locations, f, indent=2, ensure_ascii=False)
-        Log.success(f"📦 Saved updated brand_locations.json with {len(brand_locations)} entries to common path.")
+        Log.success(f" Saved updated brand_locations.json with {len(brand_locations)} entries to common path.")
     except Exception as e:
-        Log.error(f"❌ Failed to save brand_locations to common path: {e}")
+        Log.error(f" Failed to save brand_locations to common path: {e}")
 
 def safe_save_brand_origin(brand_key, country, city="Unknown"):
     if not country or country.lower() == "unknown":
@@ -2856,13 +2850,13 @@ def safe_save_brand_origin(brand_key, country, city="Unknown"):
             "fulfillment": "UK"
         }
         save_brand_locations()
-        Log.success(f"📦 Inferred and saved origin for {brand_key}: {country}")
+        Log.success(f" Inferred and saved origin for {brand_key}: {country}")
 
 
 def enrich_brand_location(brand_name, example_url):
     global brand_locations
 
-    
+
     driver = webdriver.Chrome(service=Service("C:/Users/jamie/OneDrive/Documents/University/ComputerScience/Year3/DigitalSP/DSProject/Tools/chromedriver-win64/chromedriver.exe"), options=chrome_options)
     driver.get(example_url)
 
@@ -2898,7 +2892,7 @@ def enrich_brand_location(brand_name, example_url):
                     country = location.split(",")[-1].strip()
                     city = location.split(",")[0].strip() if "," in location else "Unknown"
 
-                    print(f"🔍 Guessed: {brand_name} → {city}, {country}")
+                    print(f" Guessed: {brand_name} → {city}, {country}")
 
                     brand_locations[brand_name] = {
                         "origin": {
@@ -2907,11 +2901,11 @@ def enrich_brand_location(brand_name, example_url):
                         },
                         "fulfillment": "UK"
                     }
-                     # 🚀 Save it instantly
+                     #  Save it instantly
                     save_brand_locations()
                     return
 
-        print(f"❌ No location found for: {brand_name}")
+        print(f" No location found for: {brand_name}")
 
     finally:
         driver.quit()
@@ -2939,7 +2933,7 @@ def finalize_product_entry(product):
     """
     brand_key = product.get("brand", product.get("title", "").split()[0]).lower().strip()
     title = product.get("title", "")
-    
+
     # Resolve missing origin
     if not product.get("brand_estimated_origin") or product["brand_estimated_origin"].lower() in ["unknown", "other", ""]:
         country, city = resolve_brand_origin(brand_key, title)
@@ -2951,7 +2945,7 @@ def finalize_product_entry(product):
         fallback_weight = extract_weight(title)
         if fallback_weight:
             product["estimated_weight_kg"] = fallback_weight
-            Log.warn(f"⚖️ Fallback weight from title: {fallback_weight} kg")
+            Log.warn(f" Fallback weight from title: {fallback_weight} kg")
 
     # Save to cleaned products
     try:
@@ -2965,9 +2959,9 @@ def finalize_product_entry(product):
         cleaned.append(product)
         with open(cleaned_path, "w", encoding="utf-8") as f:
             json.dump(cleaned, f, indent=2)
-        Log.success("🧽 Product added to cleaned_products.json")
+        Log.success(" Product added to cleaned_products.json")
     except Exception as e:
-        Log.warn(f"⚠️ Could not write to cleaned_products.json: {e}")
+        Log.warn(f" Could not write to cleaned_products.json: {e}")
 
     # Save to priority products if high quality
     maybe_add_to_priority(product, priority_products)
@@ -2977,10 +2971,10 @@ for brand in brands_to_enrich:
     if brand in example_urls:
         enrich_brand_location(brand, example_urls[brand])
 
-# ✅ Save to JSON here, after loop is complete
+#  Save to JSON here, after loop is complete
 with open(BRAND_LOCATIONS_PATH, "w", encoding="utf-8") as f:
     json.dump(brand_locations, f, indent=2, ensure_ascii=False)
-Log.success(f"📦 Saved updated brand_locations.json with {len(brand_locations)} entries to common path.")
+Log.success(f" Saved updated brand_locations.json with {len(brand_locations)} entries to common path.")
 
 
 def extract_recyclability(text_blobs):
@@ -3014,7 +3008,7 @@ def scrape_amazon_titles(url, max_items=100, enrich=False):
     driver = webdriver.Chrome(service=Service(CHROMEDRIVER_PATH), options=chrome_options)
 
     if not safe_get(driver, url):
-        Log.error(f"🛑 Giving up on URL: {url}")
+        Log.error(f" Giving up on URL: {url}")
         return []
 
     try:
@@ -3022,13 +3016,13 @@ def scrape_amazon_titles(url, max_items=100, enrich=False):
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div.s-main-slot div[data-asin]"))
         )
     except:
-        Log.error("❌ Could not find product containers.")
+        Log.error(" Could not find product containers.")
         driver.quit()
         return []
 
     time.sleep(2)
     product_elements = driver.find_elements(By.CSS_SELECTOR, "div.s-main-slot div[data-asin]")
-    print(f"🔍 Found {len(product_elements)} items")
+    print(f" Found {len(product_elements)} items")
 
     products = []
 
@@ -3056,7 +3050,7 @@ def scrape_amazon_titles(url, max_items=100, enrich=False):
                     continue
 
             if not link_el:
-                Log.warn("⚠️ Skipping: No valid product link found.")
+                Log.warn(" Skipping: No valid product link found.")
                 continue
 
             href = link_el.get_attribute("href")
@@ -3094,7 +3088,7 @@ def scrape_amazon_titles(url, max_items=100, enrich=False):
 
             brand_key = brand.lower().strip()
             if is_invalid_brand(brand_key):
-                Log.warn(f"🚫 Skipping invalid brand: {brand_key}")
+                Log.warn(f" Skipping invalid brand: {brand_key}")
                 continue
 
             # === Get or enrich brand origin ===
@@ -3132,7 +3126,7 @@ def scrape_amazon_titles(url, max_items=100, enrich=False):
             })
 
         except Exception as e:
-            Log.warn(f"⚠️ Skipping product due to error: {e}")
+            Log.warn(f" Skipping product due to error: {e}")
 
     driver.quit()
     return products
@@ -3143,11 +3137,11 @@ import os
 
 #IS_DOCKER = os.environ.get('IS_DOCKER', 'false').lower() == 'true'
 def scrape_amazon_product_page(amazon_url, fallback=False):
-    print("🧪 Inside scraper function, fallback mode is:", fallback)
+    print(" Inside scraper function, fallback mode is:", fallback)
 
     # CHECK FALLBACK MODE FIRST - before any network calls
     if fallback:
-        print("🟡 Using fallback mode, returning mock product.")
+        print(" Using fallback mode, returning mock product.")
         return {
             "title": "Test Product (Fallback Mode)",
             "origin": "Unknown",
@@ -3161,22 +3155,22 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
         }
 
     driver = None
-    
+
     # Network-safe Chrome instantiation with fallback
     try:
-        print("🚀 Launching undetected ChromeDriver...")
+        print(" Launching undetected ChromeDriver...")
         from undetected_chromedriver import Chrome, ChromeOptions
         options = ChromeOptions()
         options.user_data_dir = "selenium_profile"  # Folder to store persistent session/cookies
         driver = Chrome(headless=False, options=options)
-        print("✅ ChromeDriver launched successfully")
-        
+        print(" ChromeDriver launched successfully")
+
     except Exception as chrome_error:
-        print(f"❌ ChromeDriver failed to launch: {chrome_error}")
-        print("🔄 Falling back to mock data due to network/driver issues...")
+        print(f" ChromeDriver failed to launch: {chrome_error}")
+        print(" Falling back to mock data due to network/driver issues...")
         return {
             "title": "Product (Network Fallback)",
-            "origin": "Unknown", 
+            "origin": "Unknown",
             "weight_kg": 0.5,
             "dimensions_cm": [15, 10, 5],
             "material_type": "Unknown",
@@ -3185,51 +3179,51 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
             "transport_mode": "Ship",
             "carbon_kg": None
         }
-    
+
     try:
 
 
-        print("🌐 Navigating to page:", amazon_url)
+        print(" Navigating to page:", amazon_url)
         driver.get(amazon_url)
         driver.implicitly_wait(5)
-        
-        text_blobs = [] 
-        legacy_specs = [] 
-        
-        
- # === 🛡️ Bot detection handling ===
+
+        text_blobs = []
+        legacy_specs = []
+
+
+ # ===  Bot detection handling ===
         page = driver.page_source.lower()
         if "robot check" in page or "captcha" in page:
-            print("🛑 CAPTCHA detected! Saving screenshot...")
+            print(" CAPTCHA detected! Saving screenshot...")
 
             driver.save_screenshot("captcha_screenshot.png")
-            print("📸 Saved screenshot as captcha_screenshot.png")
-            print("🧍 Please solve the CAPTCHA in the Chrome window.")
-            input("✅ Press Enter here once you've solved the CAPTCHA and see the product page...")
+            print(" Saved screenshot as captcha_screenshot.png")
+            print(" Please solve the CAPTCHA in the Chrome window.")
+            input(" Press Enter here once you've solved the CAPTCHA and see the product page...")
 
-            print("🔁 Retrying scrape after CAPTCHA solve...")
+            print(" Retrying scrape after CAPTCHA solve...")
 
             # Re-fetch page content after manual solve
             page = driver.page_source.lower()
             if "robot check" in page or "captcha" in page:
-                print("❌ CAPTCHA still present after retry. Giving up.")
+                print(" CAPTCHA still present after retry. Giving up.")
                 return None
 
 
         # Bot detection check
         page = driver.page_source.lower()
         if "robot check" in page or "captcha" in page:
-            print("🛑 Blocked by CAPTCHA / bot check.")
+            print(" Blocked by CAPTCHA / bot check.")
             return None
 
-        print("🖱️ Simulating scroll + click...")
+        print(" Simulating scroll + click...")
         try:
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight * 0.3);")
             time.sleep(random.uniform(1, 2))
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight * 0.7);")
             time.sleep(random.uniform(1.5, 2.5))
         except Exception as e:
-            print(f"⚠️ Scroll simulation failed: {e}")
+            print(f" Scroll simulation failed: {e}")
 
         # Try to expand spec blocks
         try:
@@ -3265,12 +3259,12 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                 continue
 
         if not title:
-            print(f"❌ Failed to extract product title for: {amazon_url}")
+            print(f" Failed to extract product title for: {amazon_url}")
             return None
 
         asin = extract_asin(amazon_url)
         if asin in priority_products:
-            Log.success("🎯 Using locked metadata for high-accuracy product.")
+            Log.success(" Using locked metadata for high-accuracy product.")
             return priority_products[asin]
 
         try:
@@ -3285,7 +3279,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
         brand_name = normalize_brand(brand)
         brand_key = brand_name  # already normalized
 
-        print("🧾 Raw brand text:", brand_name)
+        print(" Raw brand text:", brand_name)
 
 
         if brand_key not in brand_origin_lookup and brand_key not in known_brand_origins:
@@ -3313,24 +3307,24 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
             origin_city = origin_hubs.get(origin_country, {}).get("city", "Unknown")
             origin_source = "structured_page_data"
             origin_confidence = "high"
-            print(f"🎯 HIGH CONFIDENCE origin from structured data: {origin_country}")
-        
+            print(f" HIGH CONFIDENCE origin from structured data: {origin_country}")
+
         # STEP 2: High-confidence brand intelligence (NEW: Elevated Priority)
         elif origin_country in ["Unknown", "Other", None, ""]:
-            print("🧠 Trying high-confidence brand intelligence first...")
+            print(" Trying high-confidence brand intelligence first...")
             brand_intel = get_brand_intelligent_origin(brand_key, title)
-            
+
             if brand_intel["confidence"] in ["high", "medium"] and brand_intel["country"] != "Unknown":
                 origin_country = brand_intel["country"]
                 origin_city = origin_hubs.get(origin_country, {}).get("city", "Unknown")
                 origin_source = "brand_intelligence_priority"
                 origin_confidence = brand_intel["confidence"]
-                print(f"🎯 HIGH-CONFIDENCE brand intelligence: {brand_intel['reasoning']}")
-                
-                # 🚀 AUTO-LEARN: Save successful detection to known_brand_origins for future use
+                print(f" HIGH-CONFIDENCE brand intelligence: {brand_intel['reasoning']}")
+
+                #  AUTO-LEARN: Save successful detection to known_brand_origins for future use
                 if brand_intel["confidence"] in ["high", "medium"]:
                     auto_learn_brand_origin(brand_key, origin_country, brand_intel["reasoning"], brand_intel["confidence"])
-            
+
             # STEP 3: Only try unstructured extraction if no high-confidence brand data
             elif origin_country in ["Unknown", "Other", None, ""]:
 
@@ -3346,7 +3340,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                             r"manufacturer(?:ed)?\s+in[:\s]*([a-zA-Z\s,]+)",  # "Manufactured in Vietnam"
                             r"product\s+of[:\s]*([a-zA-Z\s,]+)"  # "Product of Vietnam"
                         ]
-                        
+
                         for pattern in origin_patterns:
                             match = re.search(pattern, blob, re.IGNORECASE)
                             if match:
@@ -3357,9 +3351,9 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                                     origin_country = fuzzy_normalize_origin(raw_origin)
                                     origin_city = origin_hubs.get(origin_country, {}).get("city", "Unknown")
                                     origin_source = "blob_match"
-                                    print(f"📍 Extracted origin from blob: '{raw_origin}' → {origin_country} (pattern: {pattern})")
+                                    print(f" Extracted origin from blob: '{raw_origin}' → {origin_country} (pattern: {pattern})")
                                     break
-                    
+
                     if origin_country not in ["Unknown", "Other", None, ""]:
                         break
 
@@ -3373,11 +3367,11 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                             origin_country = fuzzy_normalize_origin(value)
                             origin_city = origin_hubs.get(origin_country, {}).get("city", "Unknown")
                             origin_source = "techspec_origin"
-                            print(f"📍 Found origin in tech spec: {value} → {origin_country}")
+                            print(f" Found origin in tech spec: {value} → {origin_country}")
                             break
                 except Exception as e:
-                    Log.warn(f"⚠️ Error checking tech spec for origin: {e}")
-                    
+                    Log.warn(f" Error checking tech spec for origin: {e}")
+
             # 1.5.2 Extended blob fallback: broader keyword match
             if origin_country in ["Unknown", "Other", None, ""]:
                 for blob in text_blobs:
@@ -3392,7 +3386,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                             # Direct country match when keywords like 'vietnam' appear
                             r"\b(vietnam|china|germany|usa|japan|france|italy|uk|united kingdom|thailand|indonesia)\b"
                         ]
-                        
+
                         for pattern in origin_patterns:
                             match = re.search(pattern, blob, re.IGNORECASE)
                             if match:
@@ -3400,12 +3394,12 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                                 # Clean up trailing words and punctuation
                                 raw_origin = re.sub(r'\s+(and|or|the|other|countries|regions?|etc).*$', '', raw_origin, flags=re.IGNORECASE)
                                 raw_origin = re.sub(r'[,;.].*$', '', raw_origin).strip()
-                                
+
                                 if raw_origin and raw_origin.lower() not in ["unknown", "not specified", "", "n/a", "other"]:
                                     origin_country = fuzzy_normalize_origin(raw_origin)
                                     origin_city = origin_hubs.get(origin_country, {}).get("city", "Unknown")
                                     origin_source = "blob_fallback"
-                                    print(f"🌍 Extracted origin from extended blob: '{raw_origin}' → {origin_country} (pattern: {pattern})")
+                                    print(f" Extracted origin from extended blob: '{raw_origin}' → {origin_country} (pattern: {pattern})")
                                     break
                         if origin_country not in ["Unknown", "Other", None, ""]:
                             break
@@ -3413,39 +3407,39 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
 
             # 2. Fallback: brand DB, but only if page didn’t already give a specific origin
             if origin_country in ["Unknown", "Other", None, ""]:
-                print("⚠️ No page origin data found - using brand intelligence...")
+                print(" No page origin data found - using brand intelligence...")
                 brand_intel = get_brand_intelligent_origin(brand_key, title)
-                
+
                 if brand_intel["country"] != "Unknown":
                     origin_country = brand_intel["country"]
                     origin_city = origin_hubs.get(origin_country, {}).get("city", "Unknown")
                     origin_source = "brand_intelligence"
                     origin_confidence = brand_intel["confidence"]
-                    print(f"🧠 Brand intelligence: {brand_intel['reasoning']}")
+                    print(f" Brand intelligence: {brand_intel['reasoning']}")
                 else:
-                    # 🚀 SMART CONTEXT-AWARE DETECTION (before generic database fallback)
-                    print(f"🔍 Attempting smart context-aware detection for {brand_key}...")
-                    
+                    #  SMART CONTEXT-AWARE DETECTION (before generic database fallback)
+                    print(f" Attempting smart context-aware detection for {brand_key}...")
+
                     # STEP 1: Check for previously learned context-specific patterns
                     learned_result = check_learned_context_patterns(brand_key, title)
                     if learned_result["country"] != "Unknown":
                         smart_result = learned_result
-                        print(f"🎓 Using learned context pattern: {learned_result['reasoning']}")
+                        print(f" Using learned context pattern: {learned_result['reasoning']}")
                     else:
-                        # STEP 2: Run fresh smart detection with comprehensive product attributes
+                        # Fresh detection
                         product_attrs = extract_comprehensive_product_attributes(driver, None, None)
                         smart_result = smart_context_aware_origin_detection(brand_key, title, product_attrs)
-                    
+
                     if smart_result["country"] != "Unknown" and smart_result["confidence"] in ["medium", "high"]:
                         origin_country = smart_result["country"]
                         origin_city = origin_hubs.get(origin_country, {}).get("city", "Unknown")
                         origin_source = "smart_context_detection"
                         origin_confidence = smart_result["confidence"]
-                        print(f"🎯 Smart detection success: {smart_result['reasoning']}")
-                        
-                        # 🎓 AUTO-LEARN: Save context-specific detection
+                        print(f" Smart detection success: {smart_result['reasoning']}")
+
+                        #  AUTO-LEARN: Save context-specific detection
                         auto_learn_context_specific_brand(brand_key, title, origin_country, smart_result["reasoning"], smart_result["confidence"])
-                        
+
                     else:
                         # Final fallback to generic brand DB (only if smart detection fails)
                         db_origin_country, db_origin_city = resolve_brand_origin(brand_key, title)
@@ -3453,17 +3447,17 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                         origin_city = db_origin_city
                         origin_source = "brand_db_generic"
                         origin_confidence = "low"
-                        print(f"📚 Generic brand fallback (smart detection failed): {brand_key} → {origin_country}")
+                        print(f" Generic brand fallback (smart detection failed): {brand_key} → {origin_country}")
             else:
-                print(f"🛡️ Preserving explicit product origin: {origin_country} (source: {origin_source})")
+                print(f" Preserving explicit product origin: {origin_country} (source: {origin_source})")
 
             # 3. Fallback: title guess
             if origin_country in ["Unknown", "Other", None, ""] and origin_source not in ["brand_db", "blob_match", "techspec_origin"]:
                 origin_city = origin_hubs.get(origin_country, {}).get("city", "Unknown")
                 origin_source = "title_guess"
-                print(f"🧠 Fallback origin estimate from title: {guess}")
+                print(f" Fallback origin estimate from title: {guess}")
             else:
-                print(f"🚫 Skipping fallback origin guess — origin already resolved from {origin_source}")
+                print(f" Skipping fallback origin guess — origin already resolved from {origin_source}")
 
 
             # 4. Final fallback: shipping panel
@@ -3473,34 +3467,34 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                     origin_country = fuzzy_normalize_origin(guess)
                     origin_city = origin_hubs.get(origin_country, {}).get("city", "Unknown")
                     origin_source = "shipping_panel"
-                    print(f"🚚 Inferred origin from shipping panel: {guess}")
-                    
-            # 🛡️ Final fallback override guard to protect brand DB origin
+                    print(f" Inferred origin from shipping panel: {guess}")
+
+            #  Final fallback override guard to protect brand DB origin
             if origin_source == "brand_db":
                 origin_country = known_brand_origins.get(brand_key, origin_country)
                 origin_city = origin_hubs.get(origin_country, {}).get("city", "Unknown")
-                print(f"🛡️ Protected origin override — sticking with brand DB: {origin_country}")
+                print(f" Protected origin override — sticking with brand DB: {origin_country}")
 
             # Apply intelligent validation before finalizing
             validated_origin, validated_city, validated_source, validated_confidence = apply_validation_to_origin_detection(
                 origin_country, origin_source, brand_key, title
             )
-            
+
             origin_country = validated_origin
-            origin_city = validated_city 
+            origin_city = validated_city
             origin_source = validated_source
             origin_confidence = validated_confidence
-            
-            print(f"🎯 Final validated origin: {origin_country} (source: {origin_source}, confidence: {origin_confidence})")
 
-            # 🛡️ Final override protection
+            print(f" Final validated origin: {origin_country} (source: {origin_source}, confidence: {origin_confidence})")
+
+            #  Final override protection
             if asin in priority_products:
                 origin_country = priority_products[asin].get("brand_estimated_origin", origin_country)
                 origin_city = priority_products[asin].get("origin_city", origin_city)
-                print(f"🔒 Restored origin from priority DB: {origin_country}")
+                print(f" Restored origin from priority DB: {origin_country}")
 
         else:
-            print(f"🌍 Skipping all fallbacks — origin already set to: {origin_country} (source: {origin_source})")
+            print(f" Skipping all fallbacks — origin already set to: {origin_country} (source: {origin_source})")
 
 
         # === STRUCTURED DATA EXTRACTION (HIGH PRIORITY) ===
@@ -3510,12 +3504,12 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
             weight = weight_data["weight_kg"]
             weight_confidence = "high"
             weight_source = weight_data["method"]
-            print(f"⚖️ HIGH CONFIDENCE weight: {weight}kg (source: {weight_source})")
+            print(f" HIGH CONFIDENCE weight: {weight}kg (source: {weight_source})")
         else:
             weight = None
             weight_confidence = "unknown"
             weight_source = "none"
-        
+
         # Extract materials with multi-material support
         materials_data = extract_materials_from_structured_data(driver)
         if materials_data["found"]:
@@ -3523,13 +3517,13 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
             primary_material = materials_data["primary_material"]
             material_confidence = "high" if any(m["confidence"] == "high" for m in all_materials) else "medium"
             material_source = materials_data["method"]
-            
+
             # Log all materials found
             material_names = [m["name"] for m in all_materials]
-            print(f"🧬 {material_confidence.upper()} CONFIDENCE materials: {', '.join(material_names)} (primary: {primary_material})")
+            print(f" {material_confidence.upper()} CONFIDENCE materials: {', '.join(material_names)} (primary: {primary_material})")
             material_breakdown = [f"{m['name']} ({m['weight']:.1%})" for m in all_materials]
-            print(f"📊 Material breakdown: {material_breakdown}")
-            
+            print(f" Material breakdown: {material_breakdown}")
+
             material = primary_material  # For backwards compatibility
         else:
             all_materials = []
@@ -3537,7 +3531,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
             material = None
             material_confidence = "unknown"
             material_source = "none"
-        
+
         # Extract dimensions (keep existing logic for now)
         dimensions = None
         recyclability = None
@@ -3551,24 +3545,24 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
             kv_rows = driver.find_elements(By.CSS_SELECTOR, "table.a-keyvalue tr")
             desc = driver.find_elements(By.ID, "productDescription")
 
-            # ✅ Safe default + attempt to assign if possible
+            #  Safe default + attempt to assign if possible
             legacy_specs = []
             try:
                 legacy_specs = driver.find_elements(By.CSS_SELECTOR, "#productDetails_techSpec_section_1 td")
             except:
                 pass
 
-            # 📦 Now collect all into text_blobs
+            #  Now collect all into text_blobs
             text_blobs += [b.text.strip().lower() for b in bullets]
             text_blobs += [r.text.strip().lower() for r in kv_rows]
             text_blobs += [l.text.strip().lower() for l in legacy_specs]
             text_blobs += [d.text.strip().lower() for d in desc]
 
-            print("🔍 Starting to parse text blobs for product details...")
+            print(" Starting to parse text blobs for product details...")
 
-            
-            origin_already_saved = False  # ✅ Add this before the loop
-            
+
+            origin_already_saved = False  #  Add this before the loop
+
             bullets = driver.find_elements(By.CSS_SELECTOR, "#detailBullets_feature_div li")
             kv_rows = driver.find_elements(By.CSS_SELECTOR, "table.a-keyvalue tr")
             desc = driver.find_elements(By.ID, "productDescription")
@@ -3577,7 +3571,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
             text_blobs += [r.text.strip().lower() for r in kv_rows]
             text_blobs += [d.text.strip().lower() for d in desc]
 
-            # ✅ PRESERVE high-confidence material data from structured extraction
+            #  PRESERVE high-confidence material data from structured extraction
             if not material:  # Only set if not already detected
                 material = None
                 material_source = "Unknown"
@@ -3588,22 +3582,22 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                     extracted_weight = extract_weight(blob)
                     if extracted_weight:
                         weight = extracted_weight
-                        print(f"⚖️ Extracted weight: {weight} kg")
+                        print(f" Extracted weight: {weight} kg")
 
                 if not weight:
                     extracted_weight = extract_weight(title)
                     if extracted_weight:
                         weight = extracted_weight
-                        print(f"⚠️ Extracted from title fallback: {weight} kg")
+                        print(f" Extracted from title fallback: {weight} kg")
 
                 if not dimensions:
                     extracted_dimensions = extract_dimensions(blob)
                     if extracted_dimensions:
                         dimensions = extracted_dimensions
-                        print(f"📦 Extracted dimensions: {dimensions} cm")
+                        print(f" Extracted dimensions: {dimensions} cm")
 
 
-              
+
 
                 # === MATERIAL INFERENCE LOGIC ===
                 def infer_material(title, text_blobs, asin=None):
@@ -3625,7 +3619,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                         "Bamboo": ["bamboo"],
                         "Rubber": ["rubber"]
                     }
-                    
+
                     # Low-specificity materials (generic terms that can be misleading)
                     low_priority_keywords = {
                         "Plastic": ["plastic", "polypropylene", "pp", "polyethylene", "pet"],
@@ -3640,16 +3634,16 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                         if any(kw in all_text for kw in terms):
                             material = mat
                             material_source = "text_blob_match_high_priority"
-                            print(f"🎯 High-priority material match: {material} (found: {[kw for kw in terms if kw in all_text]})")
+                            print(f" High-priority material match: {material} (found: {[kw for kw in terms if kw in all_text]})")
                             break
-                    
+
                     # Only try low-priority if no high-priority match found
                     if not material:
                         for mat, terms in low_priority_keywords.items():
                             if any(kw in all_text for kw in terms):
                                 material = mat
                                 material_source = "text_blob_match_low_priority"
-                                print(f"⚠️ Low-priority material match: {material} (found: {[kw for kw in terms if kw in all_text]})")
+                                print(f" Low-priority material match: {material} (found: {[kw for kw in terms if kw in all_text]})")
                                 break
 
                     # 2. Fuzzy fallback using title (combine both priority levels)
@@ -3691,25 +3685,25 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
 
                     return material, material_source
 
-                # ✅ CONFIDENCE-BASED material detection with validation
+                #  CONFIDENCE-BASED material detection with validation
                 if not material or material_source in ["Unknown", "none"]:
                     fallback_material, fallback_source = infer_material(title, text_blobs, asin)
                     if fallback_material and fallback_material != "Unknown":
                         material = fallback_material
                         material_source = fallback_source
-                        print(f"🧬 Fallback material detection: {material} (source: {material_source})")
+                        print(f" Fallback material detection: {material} (source: {material_source})")
                 else:
-                    # 🔍 VALIDATION: Check for contradictions with fallback detection
+                    #  VALIDATION: Check for contradictions with fallback detection
                     fallback_material, fallback_source = infer_material(title, text_blobs, asin)
                     if fallback_material and fallback_material != "Unknown" and fallback_material != material:
-                        print(f"⚠️ MATERIAL CONTRADICTION DETECTED:")
+                        print(f" MATERIAL CONTRADICTION DETECTED:")
                         print(f"   High-confidence: {material} (source: {material_source})")
                         print(f"   Text blob guess: {fallback_material} (source: {fallback_source})")
-                        print(f"   🛡️ PRESERVING high-confidence data: {material}")
+                        print(f"    PRESERVING high-confidence data: {material}")
                     else:
-                        print(f"✅ Material consistency validated: {material} (source: {material_source})")
+                        print(f" Material consistency validated: {material} (source: {material_source})")
 
-                    
+
 
                 # === RECYCLABILITY ESTIMATION ===
                 material_recyclability_map = {
@@ -3729,20 +3723,20 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
 
 
 
-                # ✅ Save brand origin only ONCE
+                #  Save brand origin only ONCE
                 if not origin_already_saved:
                     safe_save_brand_origin(brand_key, origin_country, origin_city)
                     origin_already_saved = True
 
                 if weight and dimensions and material and origin_country:
-                    print("✅ All key details found.")
+                    print(" All key details found.")
                     break
-                
-                
+
+
             # === MATERIAL FALLBACK LOGIC ===
             # Only try text-based material extraction if structured extraction failed
             if not material:
-                print("⚠️ No material found in structured data - trying text blob extraction...")
+                print(" No material found in structured data - trying text blob extraction...")
                 for blob in text_blobs:
                     if any(kw in blob for kw in ["material", "sole", "outer", "fabric"]):
                         extracted_material = extract_material(blob)
@@ -3750,22 +3744,22 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                             material = extracted_material
                             material_confidence = "medium"
                             material_source = "text_blob_fallback"
-                            print(f"🧬 MEDIUM CONFIDENCE material from text: {material}")
+                            print(f" MEDIUM CONFIDENCE material from text: {material}")
                             break
-            
+
             # Don't guess materials - better to be honest about uncertainty
             if not material:
                 material = "Unknown"
                 material_confidence = "unknown"
                 material_source = "none_found"
-                print(f"🧬 No material information found - setting as Unknown")
+                print(f" No material information found - setting as Unknown")
 
             # === COMPOUND RECYCLABILITY CALCULATION ===
             # Calculate recyclability based on all materials found (compound analysis)
             if all_materials:
                 recyclability_level, recyclability_percentage, recyclability_desc = calculate_compound_recyclability(all_materials)
                 recyclability = recyclability_level
-                
+
                 # Adjust confidence based on material confidence
                 if material_confidence == "high":
                     recyclability_confidence = "high"
@@ -3773,29 +3767,29 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                     recyclability_confidence = "medium"
                 else:
                     recyclability_confidence = "low"
-                    
-                print(f"♻️ Compound recyclability analysis: {recyclability} ({recyclability_percentage}%) - {recyclability_desc} [confidence: {recyclability_confidence}]")
+
+                print(f" Compound recyclability analysis: {recyclability} ({recyclability_percentage}%) - {recyclability_desc} [confidence: {recyclability_confidence}]")
             elif material and material != "Unknown":
                 # Fallback to single material calculation
                 recyclability_level, recyclability_percentage, recyclability_desc = calculate_smart_recyclability(material)
                 recyclability = recyclability_level
                 recyclability_confidence = "medium"
-                print(f"♻️ Single material recyclability: {material} → {recyclability} ({recyclability_percentage}%) - {recyclability_desc}")
+                print(f" Single material recyclability: {material} → {recyclability} ({recyclability_percentage}%) - {recyclability_desc}")
             else:
                 # No material data available
                 recyclability = "Unknown"
                 recyclability_percentage = 0
                 recyclability_desc = "Cannot assess recyclability without material identification"
                 recyclability_confidence = "unknown"
-                print(f"♻️ Cannot calculate recyclability - no material data available")
+                print(f" Cannot calculate recyclability - no material data available")
 
         except Exception as e:
-            print("⚠️ Extraction error:", e)
+            print(" Extraction error:", e)
 
         # === INTELLIGENT FALLBACKS (only when structured extraction fails) ===
         # Weight fallback: Only use generic fallback if NO weight found anywhere
         if not weight:
-            print("⚠️ No weight found in structured data - trying text blob extraction...")
+            print(" No weight found in structured data - trying text blob extraction...")
             # Try old extraction method as fallback
             for blob in text_blobs:
                 if any(kw in blob for kw in ["weight", "weighs", "item weight"]):
@@ -3804,42 +3798,42 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                         weight = extracted_weight
                         weight_confidence = "medium"
                         weight_source = "text_blob_fallback"
-                        print(f"⚖️ MEDIUM CONFIDENCE weight from text: {weight}kg")
+                        print(f" MEDIUM CONFIDENCE weight from text: {weight}kg")
                         break
-        
+
         # Final weight fallback: Only use 1kg default if absolutely nothing found
         if not weight:
-            print("⚠️ No weight found anywhere - using category-based fallback")
+            print(" No weight found anywhere - using category-based fallback")
             # TODO: Could implement category-specific defaults here
             weight = 1.0
             weight_confidence = "low"
             weight_source = "generic_default"
 
-        # ✅ Only use shipping panel if origin is still unknown
+        #  Only use shipping panel if origin is still unknown
         if origin_country in ["Unknown", "Other", None, ""]:
             guess = extract_shipping_origin(driver)
             if guess:
                 origin_country = fuzzy_normalize_origin(guess)
                 origin_city = origin_hubs.get(origin_country, {}).get("city", "Unknown")
                 origin_source = "shipping_panel"
-                print(f"🚚 Inferred origin from shipping panel: {guess}")
+                print(f" Inferred origin from shipping panel: {guess}")
         else:
-            print(f"🛡️ Protected origin: {origin_country} (source: {origin_source})")
+            print(f" Protected origin: {origin_country} (source: {origin_source})")
 
 
-        # 🌍 GLOBAL DISTANCE CALCULATION - Flexible destination support
+        #  GLOBAL DISTANCE CALCULATION - Flexible destination support
         # Default to UK for backwards compatibility, but system supports any destination
         destination_country = "UK"  # TODO: Make this configurable based on user location
-        
+
         distance_info = calculate_global_distance(origin_country, destination_country)
         distance = distance_info["distance_km"]
         transport_mode = get_optimal_transport_mode(distance_info)
-        
-        print(f"🌍 Global routing: {distance_info['origin_city']} → {distance_info['destination_city']} ({distance} km, {transport_mode}, {distance_info['route_type']})")
 
-        
+        print(f" Global routing: {distance_info['origin_city']} → {distance_info['destination_city']} ({distance} km, {transport_mode}, {distance_info['route_type']})")
 
-        # === ✅ Fuzzy corrections for material and origin (place it HERE)
+
+
+        # ===  Fuzzy corrections for material and origin (place it HERE)
         if material:
             mat = material.lower()
             if "plastic" in mat:
@@ -3871,58 +3865,58 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                 origin_country = "Italy"
 
 
-        # 🔒 Final override if product is in trusted DB
+        #  Final override if product is in trusted DB
         if asin in priority_products:
             trusted = priority_products[asin]
             origin_country = trusted.get("brand_estimated_origin", origin_country)
             origin_city = trusted.get("origin_city", origin_city)
-            print(f"🔒 Final override from priority DB: {origin_country}")
-            
+            print(f" Final override from priority DB: {origin_country}")
+
         # === DATA PROVENANCE SUMMARY ===
-        print("\n🔍 === EXTRACTION SUMMARY ===")
-        print(f"📍 Origin: {origin_country} (source: {origin_source}, confidence: {origin_confidence})")
-        print(f"⚖️ Weight: {weight}kg (source: {weight_source}, confidence: {weight_confidence})")  
-        
+        print("\n === EXTRACTION SUMMARY ===")
+        print(f" Origin: {origin_country} (source: {origin_source}, confidence: {origin_confidence})")
+        print(f" Weight: {weight}kg (source: {weight_source}, confidence: {weight_confidence})")
+
         # Enhanced material summary
         if all_materials and len(all_materials) > 1:
             material_summary = f"Primary: {primary_material} | All: {', '.join([m['name'] for m in all_materials])}"
-            print(f"🧬 Materials: {material_summary} (source: {material_source}, confidence: {material_confidence})")
+            print(f" Materials: {material_summary} (source: {material_source}, confidence: {material_confidence})")
         else:
-            print(f"🧬 Material: {material} (source: {material_source}, confidence: {material_confidence})")
-        
-        print(f"♻️ Recyclability: {recyclability} ({recyclability_percentage}%) - {recyclability_desc}")
+            print(f" Material: {material} (source: {material_source}, confidence: {material_confidence})")
+
+        print(f" Recyclability: {recyclability} ({recyclability_percentage}%) - {recyclability_desc}")
         print("================================\n")
 
-        # 🌍 Calculate global distances using the new flexible system
+        #  Calculate global distances using the new flexible system
         destination_country = "UK"  # TODO: Make configurable based on user location
         distance_info = calculate_global_distance(origin_country, destination_country)
         distance_origin_to_uk = distance_info["distance_km"]
         distance_uk_to_user = 100  # TODO: Calculate based on user's actual location
 
         # === Now build your product dict (after fuzzy fixes)
-        
+
         # === CO2 emissions estimate using material_co2_map
         co2_emissions = None
         if material and weight:
             co2_emissions = round(material_co2_map.get(material.lower(), 2.0) * weight, 2)
-            
-        
-            
+
+
+
 
         # === Calculate overall confidence based on data sources ===
         confidence_scores = {
             "high": 3,
-            "medium": 2, 
+            "medium": 2,
             "low": 1,
             "unknown": 0
         }
-        
+
         total_confidence = (
             confidence_scores.get(origin_confidence, 0) +
             confidence_scores.get(weight_confidence, 0) +
             confidence_scores.get(material_confidence, 0)
         ) / 3
-        
+
         if total_confidence >= 2.5:
             overall_confidence = "High"
         elif total_confidence >= 1.5:
@@ -3966,27 +3960,27 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                 "material_confidence": material_confidence
             }
         }
-        
-        
-        # ✅ Now process + store it
+
+
+        #  Now process + store it
         finalize_product_entry(product)
         return product
 
 
-        # 🌍 Add comprehensive distance fields using global calculation system
+        #  Add comprehensive distance fields using global calculation system
         destination_country = "UK"  # TODO: Make configurable based on user location
         distance_info = calculate_global_distance(origin_country, destination_country)
-        
+
         product["distance_origin_to_uk"] = distance_info["distance_km"]
         product["distance_uk_to_user"] = 100  # TODO: Calculate based on actual user location
         product["transport_mode"] = get_optimal_transport_mode(distance_info)
         product["route_type"] = distance_info["route_type"]
-        
-        print(f"🌍 Global distances: {distance_info['origin_city']} → {distance_info['destination_city']} = {distance_info['distance_km']} km ({distance_info['route_type']}, {product['transport_mode']})")
+
+        print(f" Global distances: {distance_info['origin_city']} → {distance_info['destination_city']} = {distance_info['distance_km']} km ({distance_info['route_type']}, {product['transport_mode']})")
 
 
-        print("✅ Scraped product:", product["title"])
-        print(f"🎯 Returning final origin: {origin_country} (source: {origin_source})")
+        print(" Scraped product:", product["title"])
+        print(f" Returning final origin: {origin_country} (source: {origin_source})")
         return product
 
 
@@ -4004,7 +3998,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
 def save_products_to_json(products, path="../ReactPopup/public/data.json"):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(products, f, indent=2)
-    print(f"✅ Saved {len(products)} product(s) to {path}")
+    print(f" Saved {len(products)} product(s) to {path}")
 
 # === MAIN ===
 if __name__ == "__main__":
@@ -4016,28 +4010,28 @@ if __name__ == "__main__":
     try:
         with open(priority_path, "r", encoding="utf-8") as f:
             priority_db = json.load(f)
-            Log.success(f"🔐 Loaded {len(priority_db)} priority products.")
+            Log.success(f" Loaded {len(priority_db)} priority products.")
     except:
         priority_db = {}
         Log.warn("No existing priority_products.json, starting fresh.")
 
     # Define search terms
     search_terms = [
-        "usb+c+charger", "eco+friendly+bottle", "coffee+mug", "mechanical+keyboard", 	
-        "shampoo", "wireless+earbuds", "reusable+bag", "portable+fan", "toothbrush", 	
+        "usb+c+charger", "eco+friendly+bottle", "coffee+mug", "mechanical+keyboard",
+        "shampoo", "wireless+earbuds", "reusable+bag", "portable+fan", "toothbrush",
         "led+lamp", "bamboo+cutlery", "compostable+bag", "metal+straw", "plastic+container",
         "fabric+tote", "glass+bottle", "stainless+steel+mug", "wooden+spoon",
         "eco+friendly+notebooks", "recycled+stationery", "canvas+shopping+bag",
         "solar+power+bank", "eco+friendly+phone+case" ,"stainless+steel+lunchbox",
-        "reusable+baking+mat", "recycled+paper+towels", "compost+bin+kitchen", 
+        "reusable+baking+mat", "recycled+paper+towels", "compost+bin+kitchen",
         "refillable+deodorant", "eco+friendly+shampoo", "solid+shampoo+bar", "bamboo+razor",
-        "sustainable+soap", "bamboo+toothbrush", "reusable+straws", "organic+cotton+bag", 
+        "sustainable+soap", "bamboo+toothbrush", "reusable+straws", "organic+cotton+bag",
         "biodegradable+cutlery", "eco+cleaning+products", "zero+waste+kit", "reusable+water+bottle",
         "natural+deodorant", "eco+friendly+detergent", "sustainable+kitchen+items", "organic+cotton+towel",
         "eco+friendly+makeup+remover", "reusable+produce+bags", "biodegradable+trash+bags",
         "eco+friendly+gift+wrap", "bamboo+hairbrush", "eco+friendly+dish+soap", "plastic+free+toothpaste",
         "stainless+steel+straws", "eco+friendly+cutting+board", "sustainable+lunch+box",
-        "organic+cotton+napkins", "compostable+coffee+pods", "plastic+bottle", "metal+chair", 
+        "organic+cotton+napkins", "compostable+coffee+pods", "plastic+bottle", "metal+chair",
         "folding+chair", "water+bottle", "kitchen+knife",
         "cutting+board", "plastic+storage+box", "razor", "electric+shaver", "manual+toothbrush",
         "electric+toothbrush", "bath+towel", "dish+soap", "hand+soap", "laundry+detergent",
@@ -4060,31 +4054,31 @@ if __name__ == "__main__":
                 if asin and asin not in all_asins:
                     all_asins.add(asin)
                     new_products.append(p)
-            
+
             #
 
             if new_products:
                 all_products.extend(new_products)
-                Log.success(f"➕ {len(new_products)} new products")
+                Log.success(f" {len(new_products)} new products")
 
                 for p in new_products:
                     asin = p.get("asin")
                     maybe_add_to_priority(p, priority_db)
                     Log.success(f"⭐ Added high-confidence product: {asin}")
 
-                # ✅ Save after each batch of new products
+                #  Save after each batch of new products
                 with open(priority_path, "w", encoding="utf-8") as f:
                     json.dump(priority_db, f, indent=2)
-                    Log.success(f"✅ Saved {len(priority_db)} total trusted products.")
+                    Log.success(f" Saved {len(priority_db)} total trusted products.")
 
                 with open("scraped_products_tmp.json", "w", encoding="utf-8") as f:
                     json.dump(all_products, f, indent=2)
-                    Log.info(f"📥 Saved checkpoint: {len(all_products)} total")
+                    Log.info(f" Saved checkpoint: {len(all_products)} total")
 
 
         time.sleep(random.uniform(2.5, 4.5))  # anti-bot pause
 
-    # ✅ ✅ NOW PROCESS THE PRODUCTS
+    #   NOW PROCESS THE PRODUCTS
     unique_products = {p["asin"]: p for p in all_products}.values()
 
     cleaned_products = []
@@ -4103,7 +4097,7 @@ if __name__ == "__main__":
 
     with open("cleaned_products.json", "w", encoding="utf-8") as f:
         json.dump(cleaned_products, f, indent=2)
-        print(f"✅ Saved {len(cleaned_products)} to cleaned_products.json")
+        print(f" Saved {len(cleaned_products)} to cleaned_products.json")
 
     if cleaned_products:
         import csv
@@ -4112,7 +4106,7 @@ if __name__ == "__main__":
             writer = csv.DictWriter(f, fieldnames=cleaned_products[0].keys())
             writer.writeheader()
             writer.writerows(cleaned_products)
-            print(f"📄 Saved structured training data to {csv_path}")
+            print(f" Saved structured training data to {csv_path}")
 
     save_products_to_json(list(unique_products), "bulk_scraped_products.json")
 
@@ -4124,9 +4118,9 @@ def calculate_smart_recyclability(material, product_category=None):
     """
     if not material:
         return "Unknown", 30, "Material type not specified"
-    
+
     material = material.lower()
-    
+
     # Material-based recyclability mapping (updated with realistic percentages)
     recyclability_map = {
         # High recyclability (70-90%)
@@ -4135,25 +4129,25 @@ def calculate_smart_recyclability(material, product_category=None):
         "glass": ("High", 80, "Infinitely recyclable when sorted by color"),
         "paper": ("High", 75, "Widely recyclable when clean and dry"),
         "cardboard": ("High", 88, "Highly recyclable packaging material"),
-        
+
         # Medium recyclability (40-70%)
         "plastic": ("Medium", 55, "Recyclability varies by plastic type (1-7)"),
         "polyethylene": ("Medium", 65, "PE plastic commonly recycled"),
-        "polypropylene": ("Medium", 60, "PP plastic recyclable in many programs"), 
+        "polypropylene": ("Medium", 60, "PP plastic recyclable in many programs"),
         "cotton": ("Medium", 50, "Recyclable through textile programs"),
         "polyester": ("Medium", 45, "Can be recycled into new fibers"),
         "mesh": ("Medium", 40, "Depends on material composition"),
         "fabric": ("Medium", 35, "Textile recycling programs expanding"),
         "canvas": ("Medium", 40, "Natural fiber canvas more recyclable"),
         "synthetic": ("Medium", 30, "Synthetic materials harder to recycle"),
-        
+
         # Low recyclability (10-40%)
         "rubber": ("Low", 20, "Limited recycling - mainly downcycled to mats/mulch"),
         "silicone": ("Low", 15, "Specialized recycling required - very limited"),
         "nylon": ("Low", 25, "Chemical recycling emerging but limited"),
         "leather": ("Low", 10, "Not traditionally recyclable - biodegradable"),
         "foam": ("Low", 12, "Difficult to recycle - mainly energy recovery"),
-        
+
         # Mixed/Unknown materials (medium-low)
         "compound": ("Low", 25, "Mixed materials difficult to separate and recycle"),
         "composite": ("Low", 15, "Multi-material composites very hard to recycle"),
@@ -4161,12 +4155,12 @@ def calculate_smart_recyclability(material, product_category=None):
         "textile": ("Medium", 35, "Growing textile recycling infrastructure"),
         "unknown": ("Unknown", 20, "Cannot assess without material identification"),
     }
-    
+
     # Check for exact matches first
     for mat_key, (level, percentage, desc) in recyclability_map.items():
         if mat_key in material:
             return level, percentage, desc
-    
+
     # Default fallback based on common material types
     if any(term in material for term in ["metal", "alumin", "steel"]):
         return "High", 80, "Metal-based materials are typically recyclable"
