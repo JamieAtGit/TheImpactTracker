@@ -156,7 +156,7 @@ export default function ImageMaterialAnalysis({ imageUrl, title, galleryImages, 
           >
             Scanning image for materials…
           </motion.p>
-          <p className="text-slate-500 text-xs">Claude is examining each component</p>
+          <p className="text-slate-500 text-xs">ImpactTracker is examining each component</p>
         </div>
       )}
 

@@ -3822,7 +3822,7 @@ RULES:
             content.append({"type": "text", "text": user_prompt})
 
             message = client.messages.create(
-                model="claude-sonnet-4-6",
+                model="claude-sonnet-4-6",   #not being used due to module and dissertation specifications
                 max_tokens=1024,
                 temperature=0,
                 system=system_prompt,

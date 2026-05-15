@@ -51,5 +51,5 @@ marshmallow>=3.20.0
 # altair==5.5.0  # Not used by production API
 flask-limiter==3.9.0
 
-# AI Vision (Claude image material analysis)
+# AI Vision (image material analysis) (not used for diss due to ai adherence)
 anthropic>=0.40.0
