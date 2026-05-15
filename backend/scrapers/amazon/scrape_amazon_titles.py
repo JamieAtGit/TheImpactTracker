@@ -1,25 +1,18 @@
-#BOOTSTRAP
 import sys
-print(sys.executable)
 import csv
 import os
 import json
-import os
 import random
 import re
 import time
 from datetime import datetime
 import difflib
 
-# Debug: print interpreter path
-print(" Python running from:", sys.executable)
 
-# Step 1: Point to your project root (DEV/DSP)
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-# Step 2: Now you can import from common
 from common.data.brand_origin_resolver import get_brand_origin, get_brand_origin_intelligent
 try:
     from backend.utils.co2_data import load_material_co2_data
@@ -79,28 +72,6 @@ material_co2_map = load_material_co2_data()
 
 fallback_mode = False
 
-# === ChromeDriver instantiation should happen *inside* your scraping functions
-# For test or fallback mode only:
-fallback_mode = False
-print(" Fallback mode:", fallback_mode)
-
-# === CO2 Lookup Table
-material_co2_map = load_material_co2_data()
-
-#service = Service(ChromeDriverManager().install())
-#driver = webdriver.Chrome(service=Service(CHROMEDRIVER_PATH), options=chrome_options)
-
-#driver = webdriver.Chrome(service=service, options=chrome_options)
-print(" Running fallback mode — scraper disabled on remote deployment.")
-fallback_mode = False
-
-# Quick test
-#driver.get("https://www.google.com")
-#print(driver.title)
-#driver.quit()
-
-# === Load custom brand location metadata ===
-
 class Log:
     @staticmethod
     def info(msg): print(f"\033[94mℹ {msg}\033[0m")
@@ -130,9 +101,7 @@ def safe_get(driver, url, retries=3, wait=10):
     return False
 
 
-
-
-# === PRIORITY PRODUCTS DB ===
+# PRIORITY PRODUCTS DB
 priority_products = {}
 try:
     with open("priority_products.json", "r", encoding="utf-8") as f:
@@ -145,7 +114,7 @@ except Exception as e:
 
 
 brand_locations = {}
-# Canonical brand locations path (project-root common path)
+# Resolve path relative to project root
 try:
     PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
     BRAND_LOCATIONS_PATH = os.path.join(PROJECT_ROOT, 'common', 'data', 'json', 'brand_locations.json')
@@ -156,40 +125,7 @@ except Exception as e:
     Log.warn(f" Could not load canonical brand_locations.json: {e}")
 
 
-# === CONFIG ===
-ua = UserAgent()
-if webdriver is not None:
-    chrome_options = Options()
-    chrome_options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--log-level=3")
-    chrome_options.add_argument("window-size=1280,800")
-    chrome_options.add_argument("--lang=en-GB")
-
-    #  Rotate user-agent for stealth
-    random_user_agent = ua.random
-    chrome_options.add_argument(f"user-agent={random_user_agent}")
-    Log.info(f" Using User-Agent: {random_user_agent}")
-
-
-
-# === Load external brand origins CSV ===
-brand_origin_lookup = {}
-try:
-    with open("brand_origins.csv", mode="r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            brand = row["brand"].lower()
-            brand_origin_lookup[brand] = {
-                "country": row["hq_country"],
-                "city": row["hq_city"]
-            }
-except FileNotFoundError:
-    Log.warn("brand_origins.csv not found. Defaulting to heuristic mapping.")
-
-
-#  GLOBAL MANUFACTURING AND DISTRIBUTION HUBS
-# Expanded with major manufacturing centers and regions for accurate distance calculations
+# Manufacturing and distribution hubs
 origin_hubs = {
     #  Asia-Pacific
     "China": {"lat": 31.2304, "lon": 121.4737, "city": "Shanghai", "region": "Asia"},
@@ -2405,7 +2341,6 @@ def maybe_add_to_priority(product, priority_db, save_path="priority_products.jso
     return False
 
 
-
 def extract_asin(url):
     match = re.search(r"/dp/([A-Z0-9]{10})", url)
     if not match:
@@ -2463,8 +2398,6 @@ def extract_weight(text):
             return round(weight_val / 1000, 3)
 
     return None
-
-
 
 
 def extract_dimensions(text):
@@ -2611,8 +2544,6 @@ def extract_material(text):
     return None
 
 
-
-
 def haversine(lat1, lon1, lat2, lon2):
     """Calculate the great circle distance between two points on Earth (in km)"""
     from math import radians, cos, sin, sqrt, atan2
@@ -2724,7 +2655,6 @@ def get_optimal_transport_mode(distance_info):
     return "Air"  # Default fallback
 
 
-
 def resolve_brand_origin(brand_key, title_fallback=None):
     global brand_locations
 
@@ -2805,9 +2735,6 @@ def resolve_brand_origin(brand_key, title_fallback=None):
         with open("unrecognized_brands.txt", "a", encoding="utf-8") as log:
             log.write(f"{brand_key}\n")
         return "Unknown", "Unknown"
-
-
-
 
 
 def infer_fulfillment_country(url, sold_by_text=""):
@@ -3035,7 +2962,7 @@ def scrape_amazon_titles(url, max_items=100, enrich=False):
             if not asin:
                 continue
 
-            # === Robust link selector fallback ===
+            # Robust link selector fallback
             link_el = None
             for sel in [
                 "a.a-link-normal.s-no-outline",
@@ -3055,7 +2982,7 @@ def scrape_amazon_titles(url, max_items=100, enrich=False):
 
             href = link_el.get_attribute("href")
 
-            # === Extract title ===
+            # Extract title
             title = None
             for selector in [
                 "span.a-size-medium.a-color-base.a-text-normal",
@@ -3073,7 +3000,7 @@ def scrape_amazon_titles(url, max_items=100, enrich=False):
             if not title:
                 continue
 
-            # === Detect brand ===
+            # Detect brand
             brand = product.get_attribute("data-brand") or None
             if not brand:
                 try:
@@ -3091,7 +3018,7 @@ def scrape_amazon_titles(url, max_items=100, enrich=False):
                 Log.warn(f" Skipping invalid brand: {brand_key}")
                 continue
 
-            # === Get or enrich brand origin ===
+            # Get or enrich brand origin
             origin_info = get_brand_origin(brand_key)
             origin_country = origin_info["country"]
             origin_city = origin_info["city"]
@@ -3102,7 +3029,7 @@ def scrape_amazon_titles(url, max_items=100, enrich=False):
                 origin_country = origin_info["country"]
                 origin_city = origin_info["city"]
 
-            # === Estimate rest of metadata ===
+            # Estimate rest of metadata
             fulfillment_country = infer_fulfillment_country(href)
             origin = origin_hubs.get(origin_country, origin_hubs["UK"])
             fulfillment_hub = amazon_fulfillment_centers.get(fulfillment_country, amazon_fulfillment_centers["UK"])
@@ -3132,10 +3059,6 @@ def scrape_amazon_titles(url, max_items=100, enrich=False):
     return products
 
 
-
-import os
-
-#IS_DOCKER = os.environ.get('IS_DOCKER', 'false').lower() == 'true'
 def scrape_amazon_product_page(amazon_url, fallback=False):
     print(" Inside scraper function, fallback mode is:", fallback)
 
@@ -3191,7 +3114,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
         legacy_specs = []
 
 
- # ===  Bot detection handling ===
+ # Bot detection handling
         page = driver.page_source.lower()
         if "robot check" in page or "captcha" in page:
             print(" CAPTCHA detected! Saving screenshot...")
@@ -3497,7 +3420,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
             print(f" Skipping all fallbacks — origin already set to: {origin_country} (source: {origin_source})")
 
 
-        # === STRUCTURED DATA EXTRACTION (HIGH PRIORITY) ===
+        # STRUCTURED DATA EXTRACTION (HIGH PRIORITY)
         # Extract weight with confidence tracking
         weight_data = extract_weight_from_structured_data(driver)
         if weight_data["found"]:
@@ -3597,9 +3520,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                         print(f" Extracted dimensions: {dimensions} cm")
 
 
-
-
-                # === MATERIAL INFERENCE LOGIC ===
+                # MATERIAL INFERENCE LOGIC
                 def infer_material(title, text_blobs, asin=None):
                     material = None
                     material_source = "Unknown"
@@ -3704,8 +3625,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                         print(f" Material consistency validated: {material} (source: {material_source})")
 
 
-
-                # === RECYCLABILITY ESTIMATION ===
+                # RECYCLABILITY ESTIMATION
                 material_recyclability_map = {
                     "plastic": "Medium",
                     "glass": "High",
@@ -3722,7 +3642,6 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                 # Skip smart recyclability here - will be done after loop completes
 
 
-
                 #  Save brand origin only ONCE
                 if not origin_already_saved:
                     safe_save_brand_origin(brand_key, origin_country, origin_city)
@@ -3733,7 +3652,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                     break
 
 
-            # === MATERIAL FALLBACK LOGIC ===
+            # MATERIAL FALLBACK LOGIC
             # Only try text-based material extraction if structured extraction failed
             if not material:
                 print(" No material found in structured data - trying text blob extraction...")
@@ -3754,7 +3673,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                 material_source = "none_found"
                 print(f" No material information found - setting as Unknown")
 
-            # === COMPOUND RECYCLABILITY CALCULATION ===
+            # COMPOUND RECYCLABILITY CALCULATION
             # Calculate recyclability based on all materials found (compound analysis)
             if all_materials:
                 recyclability_level, recyclability_percentage, recyclability_desc = calculate_compound_recyclability(all_materials)
@@ -3786,7 +3705,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
         except Exception as e:
             print(" Extraction error:", e)
 
-        # === INTELLIGENT FALLBACKS (only when structured extraction fails) ===
+        # INTELLIGENT FALLBACKS (only when structured extraction fails)
         # Weight fallback: Only use generic fallback if NO weight found anywhere
         if not weight:
             print(" No weight found in structured data - trying text blob extraction...")
@@ -3832,7 +3751,6 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
         print(f" Global routing: {distance_info['origin_city']} → {distance_info['destination_city']} ({distance} km, {transport_mode}, {distance_info['route_type']})")
 
 
-
         # ===  Fuzzy corrections for material and origin (place it HERE)
         if material:
             mat = material.lower()
@@ -3872,7 +3790,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
             origin_city = trusted.get("origin_city", origin_city)
             print(f" Final override from priority DB: {origin_country}")
 
-        # === DATA PROVENANCE SUMMARY ===
+        # DATA PROVENANCE SUMMARY
         print("\n === EXTRACTION SUMMARY ===")
         print(f" Origin: {origin_country} (source: {origin_source}, confidence: {origin_confidence})")
         print(f" Weight: {weight}kg (source: {weight_source}, confidence: {weight_confidence})")
@@ -3901,9 +3819,7 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
             co2_emissions = round(material_co2_map.get(material.lower(), 2.0) * weight, 2)
 
 
-
-
-        # === Calculate overall confidence based on data sources ===
+        # Calculate overall confidence based on data sources
         confidence_scores = {
             "high": 3,
             "medium": 2,
@@ -3944,13 +3860,13 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
             "transport_mode": transport_mode,
             "co2_emissions": co2_emissions,
             "confidence": overall_confidence,
-            # === NEW: Enhanced material information ===
+            # NEW: Enhanced material information
             "materials": {
                 "primary_material": primary_material or material,
                 "all_materials": [{"name": m["name"], "weight": m["weight"]} for m in all_materials] if all_materials else [],
                 "material_count": len(all_materials) if all_materials else (1 if material != "Unknown" else 0)
             },
-            # === NEW: Data provenance metadata ===
+            # NEW: Data provenance metadata
             "data_sources": {
                 "origin_source": origin_source,
                 "origin_confidence": origin_confidence,
@@ -3984,7 +3900,6 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
         return product
 
 
-
     finally:
         if driver:
             try:
@@ -3993,14 +3908,13 @@ def scrape_amazon_product_page(amazon_url, fallback=False):
                 pass
 
 
-
-# === SAVE TO FILE ===
+# SAVE TO FILE
 def save_products_to_json(products, path="../ReactPopup/public/data.json"):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(products, f, indent=2)
     print(f" Saved {len(products)} product(s) to {path}")
 
-# === MAIN ===
+# MAIN
 if __name__ == "__main__":
     all_asins = set()
     all_products = []

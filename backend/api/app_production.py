@@ -11,11 +11,14 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import sys
 import hmac
+import json
+import re
 import threading
-from datetime import timedelta
+from datetime import timedelta, datetime
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -241,14 +244,8 @@ def estimate_default_weight(title: str, category: str) -> float:
     return 0.5  # fallback for genuinely unknown products
 
 
-# Import database models
 from backend.models.database import db, User, Product, ScrapedProduct, EmissionCalculation, AdminReview
 from backend.models.database import save_scraped_product, save_emission_calculation, get_or_create_scraped_product, find_cached_emission_calculation
-from werkzeug.security import generate_password_hash, check_password_hash
-
-import json
-import re
-from datetime import datetime
 
 
 _ESTIMATION_DEPS = None
